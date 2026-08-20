@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 type FilterMenuProps = {
   label: string;
+  buttonLabel?: string;
   value: string;
   options: Array<{ value: string; label: string }>;
   align?: "left" | "right";
@@ -14,6 +15,7 @@ type FilterMenuProps = {
 
 export function FilterMenu({
   label,
+  buttonLabel,
   value,
   options,
   align = "left",
@@ -33,7 +35,7 @@ export function FilterMenu({
         onClick={onToggle}
         className="flex h-8 w-full min-w-0 items-center justify-center rounded-full border border-[#ded9d1] bg-[#f4f1ec] px-2 text-[10px] text-[#4b4741] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#15151a]"
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className="truncate">{buttonLabel ?? selectedLabel}</span>
       </button>
 
       <AnimatePresence>

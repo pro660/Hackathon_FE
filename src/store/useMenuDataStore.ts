@@ -30,10 +30,12 @@ function mapApiItemToClosetItem(item: MyItemSummary): ClosetItem {
     color: item.primaryColor ?? "미입력",
     colorHex: "#d7cec2",
     imageUrl: item.primaryImageUrl ?? undefined,
+    imageId: undefined,
     brandName: item.brandName,
     material: item.material ?? "미입력",
     purchaseDate: null,
     purchasePrice: null,
+    purchasePlace: null,
     memo: null,
     createdAt: item.createdAt,
   };
@@ -53,6 +55,8 @@ function mapApiItemDetailToClosetItem(item: MyItemDetail): ClosetItem {
     }),
     purchaseDate: item.purchaseDate,
     purchasePrice: item.purchasePrice,
+    purchasePlace: item.purchasePlace,
+    imageId: item.images[0]?.imageId,
     memo: item.memo,
     version: item.version,
   };

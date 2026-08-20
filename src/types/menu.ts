@@ -1,4 +1,9 @@
-import type { ItemCategory } from "@/types/api";
+import type {
+  ColorGroup,
+  ItemCategory,
+  MaterialGroup,
+  MaterialSource,
+} from "@/types/api";
 
 export type ClosetItem = {
   id: string;
@@ -7,10 +12,12 @@ export type ClosetItem = {
   color: string;
   colorHex: string;
   imageUrl?: string;
+  imageId?: string;
   brandName: string | null;
   material: string;
   purchaseDate: string | null;
   purchasePrice: number | null;
+  purchasePlace?: string | null;
   memo: string | null;
   createdAt?: string;
   version?: number;
@@ -33,6 +40,11 @@ export type ItemUpdateInput = {
   name: string;
   brandName: string | null;
   category: ItemCategory;
+  primaryColor: ColorGroup | null;
+  material: MaterialGroup | null;
+  materialSource: MaterialSource | null;
   purchaseDate: string | null;
+  purchasePrice: number | null;
+  purchasePlace: string | null;
   memo: string | null;
 };
