@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
+import { FilterMenu } from "@/components/common/filter/FilterMenu";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
@@ -55,6 +56,7 @@ const materialLabels: Record<string, string> = {
 
 type CategoryFilter = (typeof categoryFilters)[number]["value"];
 type ColorFilter = (typeof colorFilters)[number]["value"];
+type OpenFilter = "category" | "color" | null;
 
 function getItemSubtitle(
   brandName: string | null,
@@ -76,6 +78,7 @@ export function ItemsScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("전체");
   const [selectedColor, setSelectedColor] = useState<ColorFilter>("전체");
+  const [openFilter, setOpenFilter] = useState<OpenFilter>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [hasLoaded, setHasLoaded] = useState(false);
   const items = useMenuDataStore((state) => state.items);
@@ -134,10 +137,10 @@ export function ItemsScreen() {
           </p>
         </LuxuryReveal>
 
-        <LuxuryReveal delay={60}>
+        <LuxuryReveal className="relative z-40" delay={60}>
           <div
             aria-label="내 아이템 검색 및 필터"
-            className="mt-[34px] flex items-center gap-1.5"
+            className="mt-[34px] grid grid-cols-[160px_80px_66px] items-center gap-1.5"
           >
             <input
               type="search"
@@ -147,38 +150,41 @@ export function ItemsScreen() {
               className="h-8 w-40 min-w-0 rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-3 text-center text-[10px] text-[#4b4741] outline-none transition-colors placeholder:text-[#4b4741] focus:border-[#8b7355]"
               onChange={(event) => setSearchQuery(event.target.value)}
             />
-            <select
-              aria-label="카테고리"
+            <FilterMenu
+              label="카테고리"
               value={selectedCategory}
-              className="h-8 w-20 appearance-none rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-2 text-center text-[10px] text-[#4b4741] outline-none transition-colors focus:border-[#8b7355]"
-              onChange={(event) =>
-                setSelectedCategory(event.target.value as CategoryFilter)
+              options={[...categoryFilters]}
+              open={openFilter === "category"}
+              onToggle={() =>
+                setOpenFilter((current) =>
+                  current === "category" ? null : "category",
+                )
               }
-            >
-              {categoryFilters.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="색상"
+              onChange={(value) => {
+                setSelectedCategory(value as CategoryFilter);
+                setOpenFilter(null);
+              }}
+            />
+            <FilterMenu
+              label="색상"
               value={selectedColor}
-              className="h-8 w-[66px] appearance-none rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-2 text-center text-[10px] text-[#4b4741] outline-none transition-colors focus:border-[#8b7355]"
-              onChange={(event) =>
-                setSelectedColor(event.target.value as ColorFilter)
+              options={[...colorFilters]}
+              align="right"
+              open={openFilter === "color"}
+              onToggle={() =>
+                setOpenFilter((current) =>
+                  current === "color" ? null : "color",
+                )
               }
-            >
-              {colorFilters.map((color) => (
-                <option key={color.value} value={color.value}>
-                  {color.label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => {
+                setSelectedColor(value as ColorFilter);
+                setOpenFilter(null);
+              }}
+            />
           </div>
         </LuxuryReveal>
 
-        <section className="mt-[34px]" aria-live="polite">
+        <section className="relative z-0 mt-[34px]" aria-live="polite">
         {pendingImageUpload ? (
           <LuxuryReveal delay={90}>
             <Link

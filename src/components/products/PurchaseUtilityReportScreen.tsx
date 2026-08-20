@@ -30,7 +30,7 @@ export function PurchaseUtilityReportScreen({ analysisId }: { analysisId?: strin
   return (
     <MobileScreenLayout
       figmaNodeId="156:161"
-      contentClassName="bg-white px-6 pt-[162px] pb-8 text-[#161412]"
+      contentClassName="bg-white px-6 pt-[50px] pb-8 text-[#161412]"
       bottomNavigation={<BottomNavigation activeItem="recommendation" />}
     >
       <LuxuryReveal>
