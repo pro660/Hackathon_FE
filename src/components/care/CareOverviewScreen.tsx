@@ -16,19 +16,16 @@ type CareOverviewScreenProps = { itemId?: string };
 
 export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
   const [guide, setGuide] = useState<CareGuide | null>(null);
-  const [itemName, setItemName] = useState("");
+  const [itemMaterial, setItemMaterial] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!itemId) return;
     const controller = new AbortController();
-    void Promise.all([
-      backendApi.closet.getCareGuide(itemId, controller.signal),
-      backendApi.closet.getItem(itemId, controller.signal),
-    ])
-      .then(([guideResponse, itemResponse]) => {
+    void backendApi.closet
+      .getCareGuide(itemId, controller.signal)
+      .then((guideResponse) => {
         setGuide(guideResponse.data.data);
-        setItemName(itemResponse.data.data.name);
       })
       .catch(() => {
         if (!controller.signal.aborted) setError("관리 가이드를 불러오지 못했습니다.");
@@ -36,10 +33,24 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
     return () => controller.abort();
   }, [itemId]);
 
+  useEffect(() => {
+    if (!itemId) return;
+    const controller = new AbortController();
+    void backendApi.closet
+      .getItem(itemId, controller.signal)
+      .then((response) => setItemMaterial(response.data.data.material))
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [itemId]);
+
   const entries = guide ? getGuideEntries(guide) : [];
   const primaryEntry = entries.find((entry) => !/\d{4}[-.]\d{2}[-.]\d{2}/.test(entry.value)) ?? entries[0];
   const secondaryEntries = entries.filter((entry) => entry.key !== primaryEntry?.key);
   const nextDate = findDateText(entries);
+  const canUseGuide = Boolean(
+    guide &&
+      (guide.available !== false || guide.material || itemMaterial || entries.length),
+  );
 
   return (
     <MobileScreenLayout
@@ -50,9 +61,8 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
           <BackButton />
-          <p className="mt-1 text-[11px] font-bold tracking-[0.05em] text-[#9b8057]">CARE</p>
-          <h1 className="mt-4 text-[27px] leading-8 font-bold tracking-[-0.04em]">맞춤 관리 가이드</h1>
-          <p className="mt-2 text-[14px] text-[#7a7a83]">소재에 맞춘 관리 가이드</p>
+          <h1 className="mt-1 text-[17px] leading-6 font-bold">맞춤 관리 가이드</h1>
+          <p className="mt-5 text-[13px] leading-5 text-[#7a7a83]">소재에 맞춘 관리 가이드</p>
         </LuxuryReveal>
 
         {!itemId ? (
@@ -74,7 +84,7 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
 
         {error ? <p role="alert" className="mt-8 rounded-[14px] bg-[#f8eeee] px-4 py-3 text-[12px] text-[#9a4545]">{error}</p> : null}
 
-        {guide && !guide.available && itemId ? (
+        {guide && !canUseGuide && itemId ? (
           <EmptyCareState
             title="관리 정보를 더 입력해 주세요"
             description="소재를 등록하면 맞춤 관리·보관법을 확인할 수 있고, 구매일까지 등록하면 관리 일정과 알림도 받을 수 있어요."
@@ -83,13 +93,13 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
           />
         ) : null}
 
-        {guide?.available && itemId ? (
+        {guide && canUseGuide && itemId ? (
           <>
             <LuxuryReveal className="mt-8" delay={60}>
               <section className="min-h-[142px] rounded-[18px] bg-[#f3eee6] px-[18px] py-[22px]">
-                <p className="text-[11px] font-bold text-[#9b8057]">다음 권장 관리</p>
+                <p className="text-[11px] font-bold text-[#777780]">다음 권장 관리</p>
                 <p className="mt-4 whitespace-pre-line text-[18px] leading-6 font-bold text-[#24242a]">
-                  {primaryEntry?.value ?? `${itemName || "제품"}의 관리 안내를 확인해 주세요.`}
+                  {primaryEntry?.value ?? "제품의 관리 안내를 확인해 주세요."}
                 </p>
               </section>
             </LuxuryReveal>

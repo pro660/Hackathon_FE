@@ -105,9 +105,8 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
           <BackButton />
-          <p className="mt-1 text-[11px] font-bold tracking-[0.05em] text-[#9b8057]">REMINDER</p>
-          <h1 className="mt-4 text-[27px] leading-8 font-bold tracking-[-0.04em]">관리 캘린더</h1>
-          <p className="mt-2 text-[13px] leading-5 text-[#7a7a83]">구매일과 소재별 권장 주기를 기준으로 안내해요</p>
+          <h1 className="mt-1 text-[17px] leading-6 font-bold">관리 캘린더</h1>
+          <p className="mt-5 text-[13px] leading-5 text-[#7a7a83]">구매일과 소재별 권장 주기를 기준으로 안내해요</p>
         </LuxuryReveal>
 
         {!itemId ? <StatusCard text="내 아이템에서 관리 일정을 확인할 제품을 선택해 주세요." /> : null}
@@ -133,7 +132,7 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
             </LuxuryReveal>
 
             <LuxuryReveal className="mt-7 space-y-4" delay={110}>
-              {!calendar.available ? <StatusCard text="구매일 또는 소재 정보가 없어 관리 일정을 계산할 수 없습니다." /> : null}
+              {calendar.available === false ? <StatusCard text="구매일 또는 소재 정보가 없어 관리 일정을 계산할 수 없습니다." /> : null}
               {events.map((event, index) => (
                 <article key={`${event.date}-${event.title}-${index}`} className="rounded-[14px] border border-[#e4e4e8] bg-[#f7f7f8] px-4 py-4">
                   <p className="text-[14px] font-bold">{event.date.slice(5).replace("-", "/")} {event.title}</p>
@@ -150,7 +149,7 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
 
             {itemId && reminder ? (
               <LuxuryReveal className="mt-auto pt-8" delay={160}>
-                <button type="button" disabled={isUpdatingReminder || !calendar.available} onClick={() => void toggleReminder()} className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#17171c] text-[14px] font-bold text-white disabled:opacity-45">
+                <button type="button" disabled={isUpdatingReminder || calendar.available === false} onClick={() => void toggleReminder()} className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#17171c] text-[14px] font-bold text-white disabled:opacity-45">
                   {isUpdatingReminder ? "알림 설정 중..." : reminder.enabled ? "관리 알림 끄기" : "관리 알림 설정"}
                 </button>
               </LuxuryReveal>

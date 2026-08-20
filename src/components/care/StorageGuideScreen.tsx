@@ -21,13 +21,10 @@ export function StorageGuideScreen({ itemId }: StorageGuideScreenProps) {
   useEffect(() => {
     if (!itemId) return;
     const controller = new AbortController();
-    void Promise.all([
-      backendApi.closet.getStorageGuide(itemId, controller.signal),
-      backendApi.closet.getItem(itemId, controller.signal),
-    ])
-      .then(([guideResponse, itemResponse]) => {
+    void backendApi.closet
+      .getStorageGuide(itemId, controller.signal)
+      .then((guideResponse) => {
         setGuide(guideResponse.data.data);
-        setItemName(itemResponse.data.data.name);
       })
       .catch(() => {
         if (!controller.signal.aborted) setError("보관법을 불러오지 못했습니다.");
@@ -35,7 +32,20 @@ export function StorageGuideScreen({ itemId }: StorageGuideScreenProps) {
     return () => controller.abort();
   }, [itemId]);
 
+  useEffect(() => {
+    if (!itemId) return;
+    const controller = new AbortController();
+    void backendApi.closet
+      .getItem(itemId, controller.signal)
+      .then((response) => setItemName(response.data.data.name))
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [itemId]);
+
   const entries = guide ? getGuideEntries(guide) : [];
+  const canUseGuide = Boolean(
+    guide && (guide.available !== false || guide.material || entries.length),
+  );
 
   return (
     <MobileScreenLayout
@@ -46,9 +56,8 @@ export function StorageGuideScreen({ itemId }: StorageGuideScreenProps) {
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
           <BackButton />
-          <p className="mt-1 text-[11px] font-bold tracking-[0.05em] text-[#9b8057]">STORAGE GUIDE</p>
-          <h1 className="mt-4 text-[27px] leading-8 font-bold tracking-[-0.04em]">{itemName ? `${itemName} 보관법` : "추천 보관법"}</h1>
-          <p className="mt-2 text-[13px] leading-5 text-[#7a7a83]">등록된 소재에 맞는 보관 방법을 안내해요.</p>
+          <h1 className="mt-1 text-[17px] leading-6 font-bold">{itemName ? `${itemName} 보관법` : "추천 보관법"}</h1>
+          <p className="mt-5 text-[13px] leading-5 text-[#7a7a83]">등록된 소재에 맞는 보관 방법을 안내해요.</p>
         </LuxuryReveal>
 
         {!itemId ? <GuideMessage text="내 아이템에서 보관법을 확인할 제품을 선택해 주세요." /> : null}
@@ -60,9 +69,9 @@ export function StorageGuideScreen({ itemId }: StorageGuideScreenProps) {
           </div>
         ) : null}
         {error ? <p role="alert" className="mt-8 rounded-[14px] bg-[#f8eeee] px-4 py-3 text-[12px] text-[#9a4545]">{error}</p> : null}
-        {guide && !guide.available ? <GuideMessage text="소재 정보를 등록하면 맞춤 보관법을 확인할 수 있어요." /> : null}
+        {guide && !canUseGuide ? <GuideMessage text="소재 정보를 등록하면 맞춤 보관법을 확인할 수 있어요." /> : null}
 
-        {guide?.available ? (
+        {guide && canUseGuide ? (
           <>
             <LuxuryReveal className="mt-8 space-y-5" delay={60}>
               {entries.length ? entries.map((entry, index) => (

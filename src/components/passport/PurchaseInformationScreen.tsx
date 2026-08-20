@@ -28,15 +28,6 @@ export function PurchaseInformationScreen({ itemId }: PurchaseInformationScreenP
     return () => controller.abort();
   }, [itemId]);
 
-  const purchaseRows = passport
-    ? [
-        ["주문 번호", valueOrEmpty(passport.purchaseInfo.purchaseOrderNumber)],
-        ["구매일", formatDate(passport.purchaseInfo.purchaseDate)],
-        ["구매 금액", formatPrice(passport.purchaseInfo.purchasePrice)],
-        ["구매처", valueOrEmpty(passport.purchaseInfo.purchasePlace)],
-      ]
-    : [];
-
   return (
     <MobileScreenLayout
       figmaNodeId="119:1174"
@@ -54,26 +45,50 @@ export function PurchaseInformationScreen({ itemId }: PurchaseInformationScreenP
 
         {passport ? (
           <>
-            <LuxuryReveal className="mt-9" delay={50}>
-              <p className="text-[11px] font-bold tracking-[0.08em] text-[#9b8057]">PURCHASE RECORD</p>
-              <h2 className="mt-3 text-[27px] leading-8 font-bold tracking-[-0.04em]">{passport.productInfo.name}</h2>
+            <LuxuryReveal className="mt-8" delay={50}>
+              <h2 className="text-[26px] leading-8 font-bold tracking-[-0.04em]">{passport.productInfo.name}</h2>
               <p className="mt-2 text-[13px] text-[#777780]">등록할 때 입력한 구매 기록이에요</p>
             </LuxuryReveal>
 
-            <LuxuryReveal className="mt-8 space-y-3" delay={100}>
-              {purchaseRows.map(([label, value], index) => (
-                <div key={label} className="flex min-h-[78px] items-center rounded-[17px] border border-[#e1ddd7] bg-[linear-gradient(145deg,#faf9f7,#f3f1ed)] px-4 shadow-[0_8px_22px_rgba(35,30,25,0.045)]">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#eae4da] text-[11px] font-bold text-[#8b7355]">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="ml-4 min-w-0 flex-1">
-                    <span className="block text-[11px] text-[#85858e]">{label}</span>
-                    <span className="mt-1 block break-words text-[14px] font-bold text-[#202026]">{value}</span>
-                  </span>
+            <LuxuryReveal className="mt-8" delay={100}>
+              <section className="overflow-hidden rounded-[24px] border border-[#dedee2] bg-[#f7f7f8] shadow-[0_16px_38px_rgba(20,18,15,0.07)]">
+                <div className="bg-[#15151a] px-5 py-5 text-white">
+                  <p className="text-[10px] font-semibold tracking-[0.12em] text-white/55">PURCHASE RECORD</p>
+                  <p className="mt-3 text-[22px] leading-7 font-bold">{formatPrice(passport.purchaseInfo.purchasePrice)}</p>
+                  <p className="mt-1 text-[11px] text-white/55">{formatDate(passport.purchaseInfo.purchaseDate)} 구매</p>
                 </div>
-              ))}
+                <dl className="px-5">
+                  <PurchaseRow label="주문 번호" value={valueOrEmpty(passport.purchaseInfo.purchaseOrderNumber)} />
+                  <PurchaseRow label="구매처" value={valueOrEmpty(passport.purchaseInfo.purchasePlace)} last />
+                </dl>
+              </section>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <PurchaseFact label="구매일" value={formatDate(passport.purchaseInfo.purchaseDate)} />
+                <PurchaseFact label="구매 금액" value={formatPrice(passport.purchaseInfo.purchasePrice)} />
+              </div>
             </LuxuryReveal>
           </>
         ) : null}
       </div>
     </MobileScreenLayout>
+  );
+}
+
+function PurchaseRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+  return (
+    <div className={`py-5 ${last ? "" : "border-b border-[#dfdfe3]"}`}>
+      <dt className="text-[10px] font-medium text-[#8a8a93]">{label}</dt>
+      <dd className="mt-2 break-words text-[14px] leading-5 font-bold text-[#202026]">{value}</dd>
+    </div>
+  );
+}
+
+function PurchaseFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-h-[92px] rounded-[18px] border border-[#e1e1e5] bg-white px-4 py-4 shadow-[0_8px_24px_rgba(20,18,15,0.04)]">
+      <p className="text-[10px] text-[#8a8a93]">{label}</p>
+      <p className="mt-3 break-words text-[13px] leading-5 font-bold text-[#202026]">{value}</p>
+    </div>
   );
 }
