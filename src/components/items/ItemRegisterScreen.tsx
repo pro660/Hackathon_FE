@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
-import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { analyzeItemPhoto } from "@/services/itemRegistrationWorkflow";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
@@ -108,10 +107,7 @@ export function ItemRegisterScreen() {
     >
       <div className="flex min-h-full w-full flex-col">
         <LuxuryReveal>
-          <div className="flex items-center gap-2">
-            <BackButton />
-            <h1 className="text-[17px] leading-6 font-bold">제품 사진 등록</h1>
-          </div>
+          <h1 className="text-[17px] leading-6 font-bold">제품 사진 등록</h1>
           <p className="mt-5 text-[13px] leading-5 text-[#6e707a]">
             AI가 확인 가능한 정보를 제안해요
           </p>

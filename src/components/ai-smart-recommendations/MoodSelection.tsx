@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import {
   clearSelectedSmartMoods,
   readSelectedSmartMoods,
@@ -55,11 +56,12 @@ export function MoodSelection() {
   return (
     <MobileScreenLayout
       figmaNodeId="154:2"
-      contentClassName="bg-white px-6 pt-[63px] pb-10 text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-6 pb-10 text-[#0e0e12]"
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
-          <h1 className="text-[27px] leading-8 font-bold tracking-[-0.04em]">
+          <BackButton />
+          <h1 className="mt-3 text-[27px] leading-8 font-bold tracking-[-0.04em]">
             좋아하는 무드는?
           </h1>
           <p className="mt-[25px] max-w-[330px] text-[13px] leading-[18px] text-[#6e707a]">

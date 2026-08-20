@@ -170,3 +170,28 @@ a {
   left: var(--condition-fill);
   transition: left 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+@keyframes nav-register-pop {
+  0% {
+    transform: translateY(0) scale(0.58);
+    opacity: 0.72;
+  }
+  68% {
+    transform: translateY(-10px) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px) scale(1);
+    opacity: 1;
+  }
+}
+
+.nav-register-active {
+  transform: translateY(-8px);
+  animation: nav-register-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-register-active {
+    animation: none;
+  }
+}
