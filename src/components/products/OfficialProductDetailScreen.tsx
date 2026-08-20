@@ -193,7 +193,7 @@ export function OfficialProductDetailScreen({ productId }: { productId: string }
                 ) : (
                   <PiHeart aria-hidden="true" className="size-[17px]" />
                 )}
-                {product.favorited ? "찜됨" : "찜"}
+                찜
               </button>
               <button
                 type="button"
