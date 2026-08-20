@@ -253,7 +253,8 @@ export type ProductSummary = {
   favorited: boolean;
 };
 
-export type ProductDetail = ProductSummary & {
+export type ProductDetail = Omit<ProductSummary, "primaryImageUrl"> & {
+  primaryImageUrl?: string | null;
   sku: string;
   description: string | null;
   material: MaterialGroup;

@@ -103,6 +103,12 @@ export function OfficialProductDetailScreen({ productId }: { productId: string }
     }
   };
 
+  const primaryImageUrl = product
+    ? product.primaryImageUrl ??
+      product.images.find((image) => image.isPrimary)?.url ??
+      [...product.images].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url
+    : undefined;
+
   return (
     <MobileScreenLayout
       figmaNodeId="119:547"
@@ -144,12 +150,12 @@ export function OfficialProductDetailScreen({ productId }: { productId: string }
               aria-label={`${product.name} 제품 이미지`}
               className="flex h-[294px] w-full items-center justify-center rounded-[18px] bg-[#e8e3d9] bg-contain bg-center bg-no-repeat"
               style={
-                product.primaryImageUrl
-                  ? { backgroundImage: `url("${product.primaryImageUrl}")` }
+                primaryImageUrl
+                  ? { backgroundImage: `url("${primaryImageUrl}")` }
                   : undefined
               }
             >
-              {!product.primaryImageUrl ? (
+              {!primaryImageUrl ? (
                 <span className="text-[11px] font-bold tracking-[0.12em] text-[#a29684]">
                   MCM PRODUCT
                 </span>

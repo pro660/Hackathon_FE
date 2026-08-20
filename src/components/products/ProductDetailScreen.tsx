@@ -31,6 +31,12 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
     return () => controller.abort();
   }, [productId]);
 
+  const primaryImageUrl = product
+    ? product.primaryImageUrl ??
+      product.images.find((image) => image.isPrimary)?.url ??
+      [...product.images].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url
+    : undefined;
+
   const toggleFavorite = async () => {
     if (!product || isUpdating) return;
     setIsUpdating(true); setError(null);
@@ -75,9 +81,9 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
               role="img"
               aria-label={`${product.name} 제품 이미지`}
               className="flex h-[332px] w-full items-center justify-center bg-[#f0ece7] bg-cover bg-center"
-              style={product.primaryImageUrl ? { backgroundImage: `url("${product.primaryImageUrl}")` } : undefined}
+              style={primaryImageUrl ? { backgroundImage: `url("${primaryImageUrl}")` } : undefined}
             >
-              {!product.primaryImageUrl ? <span className="text-[15px] font-bold text-[#a89b8a]">PRODUCT IMAGE</span> : null}
+              {!primaryImageUrl ? <span className="text-[15px] font-bold text-[#a89b8a]">PRODUCT IMAGE</span> : null}
             </div>
           </LuxuryReveal>
           <div className="px-6 pt-5">
