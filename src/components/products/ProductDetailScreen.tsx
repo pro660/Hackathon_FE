@@ -7,6 +7,7 @@ import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayou
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
 import { ScreenHeader } from "@/components/common/section/ScreenHeader";
+import { ProductAttributes } from "@/components/products/ProductAttributes";
 import { backendApi } from "@/services/api";
 import { useProductRecommendationStore } from "@/store/useProductRecommendationStore";
 import type { ProductDetail } from "@/types/api";
@@ -80,7 +81,7 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
             <div
               role="img"
               aria-label={`${product.name} 제품 이미지`}
-              className="flex h-[332px] w-full items-center justify-center bg-[#f0ece7] bg-cover bg-center"
+              className="flex h-[390px] w-full items-center justify-center bg-[#f0ece7] bg-contain bg-center bg-no-repeat"
               style={primaryImageUrl ? { backgroundImage: `url("${primaryImageUrl}")` } : undefined}
             >
               {!primaryImageUrl ? <span className="text-[15px] font-bold text-[#a89b8a]">PRODUCT IMAGE</span> : null}
@@ -90,10 +91,7 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
             <LuxuryReveal delay={130}>
               <h2 className="text-[20px] leading-6 font-bold tracking-[-0.025em] text-[#15151a]">{product.name}</h2>
               <p className="mt-2 text-[15px] leading-[18px] font-bold text-[#55555d]">₩ {priceFormatter.format(product.price)}</p>
-              <dl className="mt-5 grid grid-cols-2 gap-3 rounded-[18px] border border-[#dedee2] bg-[#f8f8f9] p-4 text-[12px]">
-                <div><dt className="text-[#8b7355]">SKU</dt><dd className="mt-1 font-bold text-[#35353b]">{product.sku}</dd></div>
-                <div><dt className="text-[#8b7355]">소재</dt><dd className="mt-1 font-bold text-[#35353b]">{product.material}</dd></div>
-              </dl>
+              <ProductAttributes product={product} />
               {recommendation?.recommendationScoreBreakdown ? (
                 <section className="mt-4 rounded-[18px] bg-[#f8f6f3] p-4">
                   <p className="text-[13px] font-bold text-[#15151a]">추천 점수 {recommendation.recommendationScore}점</p>

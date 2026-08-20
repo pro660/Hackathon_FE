@@ -11,6 +11,7 @@ import {
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
+import { ProductAttributes } from "@/components/products/ProductAttributes";
 import { backendApi } from "@/services/api";
 import type { ItemCategory, ProductDetail } from "@/types/api";
 
@@ -148,7 +149,7 @@ export function OfficialProductDetailScreen({ productId }: { productId: string }
             <div
               role="img"
               aria-label={`${product.name} 제품 이미지`}
-              className="flex h-[294px] w-full items-center justify-center rounded-[18px] bg-[#e8e3d9] bg-contain bg-center bg-no-repeat"
+              className="flex h-[360px] w-full items-center justify-center rounded-[18px] bg-[#e8e3d9] bg-contain bg-center bg-no-repeat"
               style={
                 primaryImageUrl
                   ? { backgroundImage: `url("${primaryImageUrl}")` }
@@ -174,9 +175,7 @@ export function OfficialProductDetailScreen({ productId }: { productId: string }
             <h2 className="mt-6 text-[14px] leading-5 font-bold">
               {product.description || "제품의 소재와 특징을 확인해 보세요"}
             </h2>
-            <p className="mt-3 text-[13px] leading-5 text-[#6e707a]">
-              소재 · 대표 색상 · 특징 태그를 확인할 수 있어요.
-            </p>
+            <ProductAttributes product={product} />
           </LuxuryReveal>
 
           <LuxuryReveal className="mt-auto pt-8" delay={160}>
