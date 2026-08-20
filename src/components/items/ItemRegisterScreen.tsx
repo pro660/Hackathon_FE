@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
-import { ScreenHeader } from "@/components/common/section/ScreenHeader";
+import { BackButton } from "@/components/common/navigation/BackButton";
+import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { analyzeItemPhoto } from "@/services/itemRegistrationWorkflow";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
 
@@ -46,6 +47,12 @@ export function ItemRegisterScreen() {
       return;
     }
 
+    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      setError("JPEG·PNG 형식의 10MB 이하 사진을 선택해 주세요.");
+      event.target.value = "";
+      return;
+    }
+
     try {
       setPhoto(file, await readImage(file));
       setError(null);
@@ -60,7 +67,7 @@ export function ItemRegisterScreen() {
 
   const handlePrimaryAction = async () => {
     if (!photoFile) {
-      fileInputRef.current?.click();
+      moveToConfirmation();
       return;
     }
 
@@ -95,16 +102,19 @@ export function ItemRegisterScreen() {
 
   return (
     <MobileScreenLayout
-      figmaNodeId="390:351"
-      contentClassName="flex bg-white px-6 pt-[47px] pb-8"
+      figmaNodeId="119:1031"
+      contentClassName="flex bg-white px-6 pt-6 pb-8 text-[#0e0e12]"
+      bottomNavigation={<BottomNavigation activeItem="register" />}
     >
       <div className="flex min-h-full w-full flex-col">
         <LuxuryReveal>
-          <ScreenHeader
-            eyebrow="ADD TO CLOSET"
-            title="제품 사진 등록"
-            description="사진 한 장으로 제품 정보를 인식해요"
-          />
+          <div className="flex items-center gap-2">
+            <BackButton />
+            <h1 className="text-[17px] leading-6 font-bold">제품 사진 등록</h1>
+          </div>
+          <p className="mt-5 text-[13px] leading-5 text-[#6e707a]">
+            AI가 확인 가능한 정보를 제안해요
+          </p>
         </LuxuryReveal>
 
         <LuxuryReveal className="mt-8" delay={60}>
@@ -146,7 +156,7 @@ export function ItemRegisterScreen() {
                   ＋
                 </span>
                 <span className="mt-5 text-[13px] text-[#6e707a]">
-                  제품을 정면에서 촬영해 주세요
+                  JPEG·PNG 최대 10MB
                 </span>
               </span>
             )}
@@ -173,17 +183,8 @@ export function ItemRegisterScreen() {
               ? "제품 정보 인식 중..."
               : photoFile
                 ? "제품 정보 확인"
-                : "사진 촬영"}
+                : "직접 입력하기"}
           </button>
-          {!photoFile ? (
-            <button
-              type="button"
-              className="mt-3 flex h-9 w-full items-center justify-center text-[11px] font-bold text-[#777780]"
-              onClick={moveToConfirmation}
-            >
-              사진 없이 직접 입력
-            </button>
-          ) : null}
         </div>
       </div>
     </MobileScreenLayout>

@@ -137,7 +137,7 @@ export function ItemsScreen() {
           </p>
         </LuxuryReveal>
 
-        <LuxuryReveal className="relative z-40" delay={60}>
+        <LuxuryReveal className="relative z-[100]" delay={60}>
           <div
             aria-label="내 아이템 검색 및 필터"
             className="mt-[34px] grid grid-cols-[160px_80px_66px] items-center gap-1.5"

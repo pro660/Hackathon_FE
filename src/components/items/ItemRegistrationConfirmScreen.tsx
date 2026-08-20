@@ -283,7 +283,7 @@ export function ItemRegistrationConfirmScreen() {
               </div>
             </div>
 
-            <div className="relative z-40 mt-6 grid grid-cols-[160px_120px] gap-1.5">
+            <div className="relative z-[100] mt-6 grid grid-cols-[160px_120px] gap-1.5">
               <FilterMenu label="대표 색상" buttonLabel={`대표 색상 · ${getColorPresentation(draft.primaryColor || "OTHER").label}`} value={draft.primaryColor || "OTHER"} options={colorOptions} open={openFilter === "color"} onToggle={() => setOpenFilter((current) => current === "color" ? null : "color")} onChange={(value) => { updateDraft({ primaryColor: value as ColorGroup }); setOpenFilter(null); }} />
               <FilterMenu label="소재" buttonLabel={`소재 · ${materialLabels[(draft.material || "UNKNOWN") as MaterialGroup]}`} value={draft.material || "UNKNOWN"} options={materialOptions} align="right" open={openFilter === "material"} onToggle={() => setOpenFilter((current) => current === "material" ? null : "material")} onChange={(value) => { updateMaterial(value as MaterialGroup); setOpenFilter(null); }} />
             </div>

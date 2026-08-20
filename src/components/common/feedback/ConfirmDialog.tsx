@@ -86,7 +86,7 @@ export function ConfirmDialog({
 
   return (
     <div
-      className={`absolute inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-[2px] ${
+        className={`absolute inset-0 z-[9999] flex items-center justify-center bg-black/35 backdrop-blur-[2px] ${
         isStacked ? "px-9" : "px-6"
       }`}
       role="dialog"

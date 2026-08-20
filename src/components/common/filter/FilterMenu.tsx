@@ -47,7 +47,7 @@ export function FilterMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.98 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-            className={`absolute top-10 z-50 max-h-64 min-w-[148px] overflow-y-auto rounded-[15px] border border-[#ded9d1] bg-white p-1.5 shadow-[0_16px_38px_rgba(21,21,26,0.2)] ${
+            className={`absolute top-10 z-[9999] max-h-64 min-w-[148px] overflow-y-auto rounded-[15px] border border-[#ded9d1] bg-white p-1.5 shadow-[0_16px_38px_rgba(21,21,26,0.2)] ${
               align === "right" ? "right-0" : "left-0"
             }`}
           >

@@ -145,7 +145,7 @@ export function ProductCatalogScreen() {
         </p>
       </LuxuryReveal>
 
-      <LuxuryReveal className="relative z-40 mt-5" delay={50}>
+      <LuxuryReveal className="relative z-[100] mt-5" delay={50}>
         <div className="grid grid-cols-[78px_64px_70px_1fr] gap-1.5">
           <FilterMenu
             label="카테고리"

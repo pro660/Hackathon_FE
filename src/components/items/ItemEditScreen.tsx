@@ -288,7 +288,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
               </div>
             </div>
 
-            <div className="relative z-40 mt-6 grid grid-cols-[160px_120px] gap-1.5">
+            <div className="relative z-[100] mt-6 grid grid-cols-[160px_120px] gap-1.5">
               <FilterMenu label="대표 색상" buttonLabel={`대표 색상 · ${colorOptions.find((option) => option.value === draft.primaryColor)?.label ?? "기타"}`} value={draft.primaryColor} options={colorOptions} open={openFilter === "color"} onToggle={() => setOpenFilter((current) => current === "color" ? null : "color")} onChange={(value) => { updateDraft({ primaryColor: value as ColorGroup }); setOpenFilter(null); }} />
               <FilterMenu label="소재" buttonLabel={`소재 · ${materialOptions.find((option) => option.value === draft.material)?.label ?? "확인 불가"}`} value={draft.material} options={materialOptions} align="right" open={openFilter === "material"} onToggle={() => setOpenFilter((current) => current === "material" ? null : "material")} onChange={(value) => { updateDraft({ material: value as MaterialGroup }); setOpenFilter(null); }} />
             </div>
