@@ -7,6 +7,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { PiReceiptDuotone, PiTagDuotone } from "react-icons/pi";
 
 import { DetailActionCard } from "@/components/common/card/DetailActionCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
@@ -189,20 +190,14 @@ export function ProductPassportScreen({ itemId }: ProductPassportScreenProps) {
                 description={productDescription}
                 href={`/items/${encodeURIComponent(itemId)}/passport/product`}
                 leading={
-                  passport.productInfo.imageUrl ? (
-                    <span
-                      role="img"
-                      aria-label={`${passport.productInfo.name} 이미지`}
-                      className="size-full bg-cover bg-center"
-                      style={{ backgroundImage: `url("${passport.productInfo.imageUrl}")` }}
-                    />
-                  ) : null
+                  <PiTagDuotone aria-hidden="true" className="size-6 text-[#75644f]" />
                 }
               />
               <DetailActionCard
                 title="구매 정보"
                 description="등록한 구매 정보를 확인"
                 href={`/items/${encodeURIComponent(itemId)}/passport/purchase`}
+                leading={<PiReceiptDuotone aria-hidden="true" className="size-6 text-[#75644f]" />}
               />
             </LuxuryReveal>
 

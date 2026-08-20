@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ProductCollectionEmptyState } from "@/components/products/ProductCollectionEmptyState";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -69,12 +70,13 @@ export function CartScreen() {
   return (
     <MobileScreenLayout
       figmaNodeId="119:674"
-      contentClassName="bg-white px-6 pt-6 pb-8 text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-4 pb-8 text-[#0e0e12]"
       bottomNavigation={<BottomNavigation activeItem="my" />}
     >
       <LuxuryReveal>
-        <h1 className="text-[17px] leading-6 font-bold">MCM 제품 확인</h1>
-        <p className="mt-8 text-[13px] leading-5 text-[#6e707a]">
+        <BackButton />
+        <h1 className="mt-1 text-[17px] leading-6 font-bold">MCM 제품 확인</h1>
+        <p className="mt-5 text-[13px] leading-5 text-[#6e707a]">
           최신 가격과 재고는 MCM 공식 제품 페이지에서 확인
         </p>
       </LuxuryReveal>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { PiArchiveDuotone, PiCalendarDotsDuotone } from "react-icons/pi";
 
 import { DetailActionCard } from "@/components/common/card/DetailActionCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
@@ -44,8 +45,10 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
   }, [itemId]);
 
   const entries = guide ? getGuideEntries(guide) : [];
-  const primaryEntry = entries.find((entry) => !/\d{4}[-.]\d{2}[-.]\d{2}/.test(entry.value)) ?? entries[0];
-  const secondaryEntries = entries.filter((entry) => entry.key !== primaryEntry?.key);
+  const primaryEntry =
+    entries.find((entry) => /nextRecommendedCare|recommendation|instructions|careGuide|guide/i.test(entry.key)) ??
+    entries.find((entry) => !/summary|core|keyPoint|highlight/i.test(entry.key) && !/\d{4}[-.]\d{2}[-.]\d{2}/.test(entry.value));
+  const coreEntry = entries.find((entry) => /summary|core|keyPoint|highlight/i.test(entry.key));
   const nextDate = findDateText(entries);
   const canUseGuide = Boolean(
     guide &&
@@ -109,22 +112,24 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
                 title="권장 주기 · 제품 소재 기준"
                 description={nextDate ? `다음 권장일 · ${nextDate}` : "관리 일정을 확인해 보세요"}
                 href={`/care/calendar?itemId=${encodeURIComponent(itemId)}`}
+                leading={<PiCalendarDotsDuotone aria-hidden="true" className="size-6 text-[#75644f]" />}
               />
               <DetailActionCard
                 title="환경·습도 및 보관법"
                 description="환경과 소재에 맞는 보관 방법"
                 href={`/care/storage?itemId=${encodeURIComponent(itemId)}`}
+                leading={<PiArchiveDuotone aria-hidden="true" className="size-6 text-[#75644f]" />}
               />
             </LuxuryReveal>
 
-            {secondaryEntries.length ? (
-              <LuxuryReveal className="mt-6 space-y-3" delay={150}>
-                {secondaryEntries.map((entry) => (
-                  <div key={entry.key} className="rounded-[15px] border border-[#e4e4e8] bg-[#f7f7f8] px-4 py-4">
-                    <p className="text-[11px] font-bold text-[#777780]">{entry.label}</p>
-                    <p className="mt-2 whitespace-pre-line text-[13px] leading-5 text-[#35353b]">{entry.value}</p>
-                  </div>
-                ))}
+            {coreEntry || primaryEntry ? (
+              <LuxuryReveal className="mt-6" delay={150}>
+                <div className="rounded-[15px] border border-[#e4e4e8] bg-[#f7f7f8] px-4 py-4">
+                  <p className="text-[11px] font-bold text-[#777780]">핵심 안내</p>
+                  <p className="mt-2 whitespace-pre-line text-[13px] leading-5 text-[#35353b]">
+                    {coreEntry?.value ?? primaryEntry?.value}
+                  </p>
+                </div>
               </LuxuryReveal>
             ) : null}
 

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { FilterMenu } from "@/components/common/filter/FilterMenu";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
-import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ItemListCard } from "@/components/items/ItemListCard";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
@@ -130,8 +129,7 @@ export function ItemsScreen() {
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
-          <BackButton />
-          <h1 className="mt-1 text-[17px] leading-5 font-bold tracking-[-0.02em]">
+          <h1 className="text-[17px] leading-5 font-bold tracking-[-0.02em]">
             내 아이템
           </h1>
           <p className="mt-8 text-[13px] leading-4 text-[#85858f]">

@@ -1,4 +1,16 @@
-const hiddenKeys = new Set(["myItemId", "available", "material", "month"]);
+const hiddenKeys = new Set([
+  "myItemId",
+  "available",
+  "material",
+  "materialSource",
+  "month",
+  "source",
+  "generationType",
+  "policyVersion",
+  "version",
+  "createdAt",
+  "updatedAt",
+]);
 
 const labelMap: Record<string, string> = {
   nextRecommendedCare: "다음 권장 관리",
