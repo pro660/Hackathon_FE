@@ -18,7 +18,16 @@ export function MoodSelection() {
   const [selectedMoods, setSelectedMoods] = useState<SmartMood[]>([]);
 
   useEffect(() => {
-    setSelectedMoods(readSelectedSmartMoods());
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active) {
+        setSelectedMoods(readSelectedSmartMoods());
+      }
+    });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const toggleMood = (mood: SmartMood) => {

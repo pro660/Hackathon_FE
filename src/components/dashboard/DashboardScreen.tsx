@@ -348,7 +348,7 @@ export function DashboardScreen() {
                 "아직 저장한 스타일 플랜이 없어요"}
             </h2>
             <Link
-              href="/personalize"
+              href="/smart-recommendations"
               className="mt-[14px] flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
             >
               스마트 착용 추천&nbsp; ›

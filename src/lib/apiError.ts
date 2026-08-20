@@ -7,7 +7,7 @@ export function getApiErrorCode(error: unknown) {
     return null;
   }
 
-  return error.response?.data.error.code ?? null;
+  return error.response?.data?.error?.code ?? null;
 }
 
 export function getApiErrorMessage(error: unknown, fallback: string) {
@@ -15,7 +15,7 @@ export function getApiErrorMessage(error: unknown, fallback: string) {
     return fallback;
   }
 
-  return error.response?.data.error.message ?? fallback;
+  return error.response?.data?.error?.message ?? fallback;
 }
 
 export function getApiFieldErrors(error: unknown): ApiFieldError[] {
@@ -23,5 +23,5 @@ export function getApiFieldErrors(error: unknown): ApiFieldError[] {
     return [];
   }
 
-  return error.response?.data.error.fields ?? [];
+  return error.response?.data?.error?.fields ?? [];
 }

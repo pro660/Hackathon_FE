@@ -101,7 +101,7 @@ function readOccasion(values: SmartMood[]): OccasionTag {
   }
 
   if (values.includes("EXHIBITION")) {
-    return "GATHERING";
+    return "OTHER";
   }
 
   return "DAILY";
