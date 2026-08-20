@@ -34,6 +34,8 @@ function mergePlaces(current: PlaceDetail[], incoming: PlaceDetail[]) {
 
 type PlaceState = {
   places: PlaceDetail[];
+  lastRecommendedPlaces: PlaceRecommendation[];
+  lastRecommendationStylePlanId: string | null;
   savedPlaceIds: string[];
   pendingPlaceIds: string[];
   isLoadingSavedPlaces: boolean;
@@ -41,7 +43,10 @@ type PlaceState = {
   loadedPlaceIds: string[];
   placeDetailError: string | null;
   error: string | null;
-  registerPlaces: (places: PlaceRecommendation[]) => void;
+  registerPlaces: (
+    places: PlaceRecommendation[],
+    stylePlanId?: string,
+  ) => void;
   loadPlace: (placeId: string, signal?: AbortSignal) => Promise<PlaceDetail | null>;
   loadSavedPlaces: () => Promise<void>;
   toggleSavedPlace: (placeId: string) => Promise<boolean>;
@@ -49,6 +54,8 @@ type PlaceState = {
 
 export const usePlaceStore = create<PlaceState>((set, get) => ({
   places: [],
+  lastRecommendedPlaces: [],
+  lastRecommendationStylePlanId: null,
   savedPlaceIds: [],
   pendingPlaceIds: [],
   isLoadingSavedPlaces: false,
@@ -57,7 +64,7 @@ export const usePlaceStore = create<PlaceState>((set, get) => ({
   placeDetailError: null,
   error: null,
 
-  registerPlaces: (recommendations) =>
+  registerPlaces: (recommendations, stylePlanId) =>
     set((state) => {
       const details = recommendations.map((place) => {
         const existing = state.places.find((candidate) => candidate.id === place.id);
@@ -73,7 +80,15 @@ export const usePlaceStore = create<PlaceState>((set, get) => ({
         } satisfies PlaceDetail;
       });
 
-      return { places: mergePlaces(state.places, details) };
+      return {
+        places: mergePlaces(state.places, details),
+        ...(stylePlanId
+          ? {
+              lastRecommendedPlaces: recommendations,
+              lastRecommendationStylePlanId: stylePlanId,
+            }
+          : {}),
+      };
     }),
 
   loadPlace: async (placeId, signal) => {

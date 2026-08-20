@@ -372,13 +372,21 @@ export function DashboardScreen() {
         </LuxuryReveal>
 
         <LuxuryReveal className="mt-5" delay={300}>
-          <div className="mb-4">
-            <h2 className="text-[16px] leading-5 font-bold text-[#0e0e12]">
-              MCM 제품
-            </h2>
-            <p className="mt-1.5 text-[12px] leading-4 text-[#6e707a]">
-              취향과 잘 맞는 제품을 더 둘러보세요
-            </p>
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-[16px] leading-5 font-bold text-[#0e0e12]">
+                MCM 제품
+              </h2>
+              <p className="mt-1.5 text-[12px] leading-4 text-[#6e707a]">
+                취향과 잘 맞는 제품을 더 둘러보세요
+              </p>
+            </div>
+            <Link
+              href="/recommendations"
+              className="shrink-0 pb-0.5 text-[11px] font-bold text-[#6e707a] transition-colors hover:text-[#0e0e12]"
+            >
+              더보기&nbsp; ›
+            </Link>
           </div>
           <ul className="space-y-2">
             {products.slice(0, 3).map((product) => (

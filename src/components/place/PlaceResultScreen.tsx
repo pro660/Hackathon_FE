@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
-import { ScreenHeader } from "@/components/common/section/ScreenHeader";
-import { PlaceKeywords } from "@/components/place/PlaceKeywords";
 import { PlaceList } from "@/components/place/PlaceList";
 import { PlaceMap } from "@/components/place/PlaceMap";
 import { backendApi } from "@/services/api";
@@ -51,8 +49,20 @@ export function PlaceResultScreen({
   longitude,
 }: PlaceResultScreenProps) {
   const router = useRouter();
+  const lastRecommendedPlaces = usePlaceStore(
+    (state) => state.lastRecommendedPlaces,
+  );
+  const lastRecommendationStylePlanId = usePlaceStore(
+    (state) => state.lastRecommendationStylePlanId,
+  );
   const hasBackendRequest = true;
-  const [displayPlaces, setDisplayPlaces] = useState(places);
+  const [displayPlaces, setDisplayPlaces] = useState(() =>
+    places.length > 0
+      ? places
+      : lastRecommendationStylePlanId === stylePlanId
+        ? lastRecommendedPlaces
+        : [],
+  );
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
   const [detailReadyPlaceId, setDetailReadyPlaceId] = useState<string>();
   const [isLoading, setIsLoading] = useState(hasBackendRequest);
@@ -60,8 +70,10 @@ export function PlaceResultScreen({
   const registerPlaces = usePlaceStore((state) => state.registerPlaces);
 
   useEffect(() => {
-    registerPlaces(displayPlaces);
-  }, [displayPlaces, registerPlaces]);
+    if (displayPlaces.length > 0) {
+      registerPlaces(displayPlaces, stylePlanId);
+    }
+  }, [displayPlaces, registerPlaces, stylePlanId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -101,14 +113,13 @@ export function PlaceResultScreen({
 
     void request
       .then((nextPlaces) => {
-
+        registerPlaces(nextPlaces, stylePlanId);
         setDisplayPlaces(nextPlaces);
         setSelectedPlaceId(undefined);
         setDetailReadyPlaceId(undefined);
       })
       .catch((failure: unknown) => {
         if (!controller.signal.aborted) {
-          setDisplayPlaces([]);
           setError(failure instanceof Error ? failure.message : "장소를 불러오지 못했습니다.");
         }
       })
@@ -119,11 +130,21 @@ export function PlaceResultScreen({
       });
 
     return () => controller.abort();
-  }, [latitude, longitude, stylePlanId]);
+  }, [latitude, longitude, registerPlaces, stylePlanId]);
+
+  const createPlaceDetailHref = (placeId: string) => {
+    const params = new URLSearchParams();
+    if (stylePlanId) params.set("stylePlanId", stylePlanId);
+    if (latitude !== undefined) params.set("latitude", String(latitude));
+    if (longitude !== undefined) params.set("longitude", String(longitude));
+    const query = params.toString();
+
+    return `/place/${encodeURIComponent(placeId)}${query ? `?${query}` : ""}`;
+  };
 
   const handlePlaceSelect = (place: PlaceRecommendation) => {
     if (detailReadyPlaceId === place.id) {
-      router.push(`/place/${encodeURIComponent(place.id)}`);
+      router.push(createPlaceDetailHref(place.id));
       return;
     }
 
@@ -142,19 +163,22 @@ export function PlaceResultScreen({
 
   return (
     <MobileScreenLayout
-      figmaNodeId="96:244"
-      contentClassName="px-6 pt-[47px] pb-6"
+      figmaNodeId="119:758"
+      contentClassName="px-6 pt-6 pb-6"
       bottomNavigation={<BottomNavigation activeItem="home" />}
     >
       <LuxuryReveal>
-        <ScreenHeader
-          eyebrow="PLACE MATCH"
-          title="이 룩과 어울리는 곳"
-          description={displayKeywords.length > 0 ? <PlaceKeywords keywords={displayKeywords} /> : "저장한 스타일과 현재 위치를 기준으로 추천해요"}
-        />
+        <header>
+          <h1 className="text-[17px] leading-5 font-bold text-[#0e0e12]">
+            장소 매치
+          </h1>
+          <p className="mt-[35px] text-[13px] leading-5 text-[#6e707a]">
+            현재 룩과 어울리는 장소를 찾았어요
+          </p>
+        </header>
       </LuxuryReveal>
 
-      <LuxuryReveal className="mt-10" delay={70}>
+      <LuxuryReveal className="mt-8" delay={70}>
         {isLoading ? (
           <p className="mb-3 text-[11px] text-[#777780]">백엔드에서 추천 장소 좌표를 불러오고 있습니다.</p>
         ) : null}

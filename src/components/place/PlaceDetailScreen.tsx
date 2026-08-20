@@ -2,18 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
+import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ScreenHeader } from "@/components/common/section/ScreenHeader";
+import { PlaceMap } from "@/components/place/PlaceMap";
 import { usePlaceStore } from "@/store/usePlaceStore";
 
 type PlaceDetailScreenProps = {
   placeId: string;
+  stylePlanId?: string;
+  latitude?: string;
+  longitude?: string;
 };
 
-export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
+export function PlaceDetailScreen({
+  placeId,
+  stylePlanId,
+  latitude,
+  longitude,
+}: PlaceDetailScreenProps) {
+  const router = useRouter();
   const places = usePlaceStore((state) => state.places);
   const savedPlaceIds = usePlaceStore((state) => state.savedPlaceIds);
   const pendingPlaceIds = usePlaceStore((state) => state.pendingPlaceIds);
@@ -29,6 +41,15 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
     () => places.find((candidate) => candidate.id === placeId),
     [placeId, places],
   );
+  const placeMatchHref = useMemo(() => {
+    const params = new URLSearchParams();
+    if (stylePlanId) params.set("stylePlanId", stylePlanId);
+    if (latitude) params.set("latitude", latitude);
+    if (longitude) params.set("longitude", longitude);
+    const query = params.toString();
+
+    return `/place${query ? `?${query}` : ""}`;
+  }, [latitude, longitude, stylePlanId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -63,7 +84,7 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
             />
           </div>
           <Link
-            href="/place"
+            href={placeMatchHref}
             className="mt-auto flex h-[52px] items-center justify-center rounded-[14px] bg-[#0e0e12] text-[14px] font-bold text-white"
           >
             장소 추천으로 돌아가기
@@ -75,28 +96,37 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
 
   const isSaved = savedPlaceIds.includes(place.id);
   const isSaving = pendingPlaceIds.includes(place.id);
-  const walkingLabel =
-    place.walkingMinutes === null ? "이동 시간 확인" : `도보 ${place.walkingMinutes}분`;
-
-  const handleToggleSaved = async () => {
+  const handleSavePlace = async () => {
     setActionMessage(null);
+
+    if (isSaved) {
+      router.push("/place/saved");
+      return;
+    }
+
     try {
       const nextSaved = await toggleSavedPlace(place.id);
-      setActionMessage(nextSaved ? "장소를 저장했어요." : "저장을 취소했어요.");
+      if (nextSaved) {
+        router.push("/place/saved");
+        return;
+      }
+
+      setActionMessage("장소를 저장하지 못했어요.");
     } catch {
-      setActionMessage("장소 저장 상태를 변경하지 못했어요.");
+      setActionMessage("장소를 저장하지 못했어요.");
     }
   };
 
   return (
     <MobileScreenLayout
-      figmaNodeId="390:185"
-      contentClassName="flex bg-white px-6 pt-[47px] pb-8"
+      figmaNodeId="156:54"
+      contentClassName="flex bg-white px-6 pt-4 pb-2"
+      bottomNavigation={<BottomNavigation activeItem="recommendation" />}
     >
       <div className="flex min-h-full w-full flex-col">
         <LuxuryReveal>
           <Link
-            href="/place"
+            href={placeMatchHref}
             aria-label="장소 매치 페이지로 이동"
             className="group flex size-9 items-center justify-start bg-transparent text-[#121217] transition-colors hover:text-[#8b7355] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#15151a]"
           >
@@ -107,33 +137,28 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
               ‹
             </span>
           </Link>
-          <div className="mt-6">
-            <ScreenHeader
-              eyebrow="PLACE DETAIL"
-              title={place.name}
-              description={`${place.area} · ${place.category} · ${walkingLabel}`}
-            />
-          </div>
+          <h1 className="text-[17px] leading-5 font-bold text-[#0e0e12]">
+            {place.name}
+          </h1>
         </LuxuryReveal>
 
         <LuxuryReveal className="mt-8" delay={60}>
-          <div
-            role="img"
-            aria-label={`${place.name} 장소 이미지`}
-            className="h-[260px] w-full rounded-[18px]"
-            style={{
-              backgroundColor: place.thumbnailColor,
-              backgroundImage:
-                "linear-gradient(145deg, rgba(255,255,255,0.45), transparent 48%, rgba(14,14,18,0.06))",
-            }}
+          <PlaceMap
+            places={[place]}
+            areaLabel={place.area}
+            heightClassName="h-[360px]"
+            selectedPlaceId={place.id}
           />
         </LuxuryReveal>
 
-        <LuxuryReveal className="mt-8" delay={110}>
-          {place.summary ? <h2 className="text-[14px] leading-5 font-bold text-[#0e0e12]">{place.summary}</h2> : null}
-          <div className="mt-6 text-[13px] leading-[18px] text-[#6e707a]">
-            {place.businessHours ? <p>영업시간 {place.businessHours}</p> : null}
-            <p>{place.address}</p>
+        <LuxuryReveal className="mt-6" delay={110}>
+          <div className="min-h-[82px] rounded-[16px] border border-[#e0e2e5] bg-[#f8f8f9] px-5 py-4">
+            <p className="text-[12px] leading-5 font-bold text-[#6b6e78]">
+              주소
+            </p>
+            <p className="mt-1 text-[15px] leading-6 font-bold text-[#0e0e12]">
+              {place.address}
+            </p>
           </div>
           {actionMessage || storeError ? (
             <p
@@ -145,14 +170,14 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
           ) : null}
         </LuxuryReveal>
 
-        <LuxuryReveal className="mt-auto space-y-4 pt-8" delay={170}>
+        <LuxuryReveal className="mt-auto pt-10" delay={170}>
           <button
             type="button"
             disabled={isSaving}
             className="flex h-[52px] w-full items-center justify-center rounded-[14px] border border-[#dbdee3] bg-white text-[14px] font-bold text-[#0e0e12] disabled:opacity-50"
-            onClick={() => void handleToggleSaved()}
+            onClick={() => void handleSavePlace()}
           >
-            {isSaving ? "처리 중..." : isSaved ? "저장 취소" : "장소 저장"}
+            {isSaving ? "저장 중..." : isSaved ? "저장한 장소 보기" : "장소 저장"}
           </button>
         </LuxuryReveal>
       </div>

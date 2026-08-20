@@ -15,6 +15,7 @@ import type { PlaceRecommendation } from "@/types/place";
 type PlaceMapProps = {
   places: PlaceRecommendation[];
   areaLabel?: string;
+  heightClassName?: string;
   selectedPlaceId?: string;
   onMarkerSelect?: (place: PlaceRecommendation) => void;
 };
@@ -109,6 +110,7 @@ function createMarkerElement(place: PlaceRecommendation, index: number) {
 export function PlaceMap({
   places,
   areaLabel = "추천 지역",
+  heightClassName = "h-[220px]",
   selectedPlaceId,
   onMarkerSelect,
 }: PlaceMapProps) {
@@ -290,7 +292,7 @@ export function PlaceMap({
       <section
         id="place-map"
         aria-label="추천 장소 3D 지도"
-        className="relative h-[220px] overflow-hidden rounded-[20px] border border-[#ebe7e1] bg-[#efebe5]"
+        className={`relative overflow-hidden rounded-[20px] border border-[#ebe7e1] bg-[#efebe5] ${heightClassName}`}
       >
         <div className="absolute inset-0">
           <div ref={mapContainerRef} className="h-full w-full" />
