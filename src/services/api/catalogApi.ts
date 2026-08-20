@@ -66,8 +66,11 @@ export const catalogApi = {
   removeFavorite: (productId: string) =>
     api.delete<void>(`/products/${productId}/favorite`),
 
-  getCartItems: (params: PageQuery = {}) =>
-    api.get<ApiSuccessResponse<ApiPage<CartItem>>>("/cart-items", { params }),
+  getCartItems: (params: PageQuery = {}, signal?: AbortSignal) =>
+    api.get<ApiSuccessResponse<ApiPage<CartItem>>>("/cart-items", {
+      params,
+      signal,
+    }),
 
   addToCart: (productId: string) =>
     api.put<void>(`/products/${productId}/cart`),

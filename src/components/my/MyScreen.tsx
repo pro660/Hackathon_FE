@@ -7,6 +7,7 @@ import {
   PiHeartBold,
   PiIdentificationCardBold,
   PiMapPinBold,
+  PiShoppingBagOpenBold,
 } from "react-icons/pi";
 
 import { DetailActionCard } from "@/components/common/card/DetailActionCard";
@@ -56,6 +57,12 @@ export function MyScreen() {
       description: "저장한 제품 보기",
       href: "/wishlist",
       leading: <PiHeartBold aria-hidden="true" className="size-6" />,
+    },
+    {
+      title: "담은 제품",
+      description: "구매 후보로 담은 제품 확인",
+      href: "/cart",
+      leading: <PiShoppingBagOpenBold aria-hidden="true" className="size-6" />,
     },
   ];
 

@@ -5,9 +5,11 @@ import Link from "next/link";
 
 import { ImageGridCard, ImageGridSkeleton } from "@/components/common/card/ImageGridCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
+import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ScreenHeader } from "@/components/common/section/ScreenHeader";
+import { ProductCollectionEmptyState } from "@/components/products/ProductCollectionEmptyState";
 import { backendApi } from "@/services/api";
 import type { ProductSummary } from "@/types/api";
 
@@ -23,17 +25,36 @@ export function WishlistScreen() {
       .finally(() => setIsLoading(false));
   }, []);
 
+  const isEmpty = !isLoading && !error && products.length === 0;
+
   return (
     <MobileScreenLayout
+      figmaNodeId={isEmpty ? "119:1699" : undefined}
       contentClassName="bg-white px-6 pt-4 pb-8"
       bottomNavigation={<BottomNavigation activeItem="my" />}
     >
-      <BackButton />
-      <div className="mt-5"><ScreenHeader eyebrow="WISHLIST" title="찜한 제품" description="저장해 둔 제품을 확인해요" /></div>
-      <section className="mt-8">
+      {isEmpty ? (
+        <div className="flex min-h-full flex-col pt-2">
+          <LuxuryReveal>
+            <h1 className="text-[17px] leading-6 font-bold text-[#0e0e12]">
+              찜한 제품
+            </h1>
+            <p className="mt-8 text-[13px] leading-5 text-[#6e707a]">
+              나중에 다시 볼 제품을 모았어요
+            </p>
+          </LuxuryReveal>
+          <ProductCollectionEmptyState
+            title="찜한 제품이 아직 없어요"
+            description="마음에 드는 MCM 제품을 저장해 보세요."
+          />
+        </div>
+      ) : (
+        <>
+          <BackButton />
+          <div className="mt-5"><ScreenHeader eyebrow="WISHLIST" title="찜한 제품" description="저장해 둔 제품을 확인해요" /></div>
+          <section className="mt-8">
         {isLoading ? <ImageGridSkeleton label="찜한 제품을 불러오는 중" /> : null}
         {error ? <p role="alert" className="rounded-[14px] bg-[#f8eeee] px-4 py-3 text-[12px] text-[#9a4545]">{error}</p> : null}
-        {!isLoading && !error && products.length === 0 ? <p className="rounded-[18px] border border-[#dedee2] px-5 py-10 text-center text-[13px] text-[#777780]">찜한 제품이 없습니다.</p> : null}
         <ul className="grid grid-cols-2 gap-3">
           {products.map((product) => (
             <li key={product.productId}>
@@ -43,7 +64,9 @@ export function WishlistScreen() {
             </li>
           ))}
         </ul>
-      </section>
+          </section>
+        </>
+      )}
     </MobileScreenLayout>
   );
 }
