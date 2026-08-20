@@ -104,7 +104,7 @@ export default function AiRecommendPage() {
         setContext(nextContext);
         setJobId(job.jobId);
         setPreview(result);
-        setStatus(result.generationType === "RULE_BASED" ? "규칙 기반 추천으로 구성했어요." : "스타일 분석이 완료됐어요.");
+        setStatus("");
       })
       .catch((failure) => { if (!controller.signal.aborted) { setStatus(""); setError(getApiErrorMessage(failure, "스타일 추천을 불러오지 못했습니다.")); } })
       .finally(() => sessionStorage.removeItem(stylePlanIdempotencyStorageKey));
@@ -226,7 +226,7 @@ export default function AiRecommendPage() {
                     key={`${product.productId}-${product.rank}`}
                     imageUrl={product.imageUrl}
                     title={product.name}
-                    description={product.reason}
+                    description={`선정 이유 · ${product.reason}`}
                     badge={`${product.rank}순위`}
                   />
                 ))}
@@ -241,7 +241,7 @@ export default function AiRecommendPage() {
         </div>
       ) : null}
 
-      <LuxuryReveal className="mt-10" delay={210}>
+      <LuxuryReveal className="mt-6" delay={210}>
         <button
           type="button"
           disabled={!preview || isSaving}
