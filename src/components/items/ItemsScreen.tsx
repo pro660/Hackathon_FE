@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
@@ -10,7 +10,20 @@ import { ItemListCard } from "@/components/items/ItemListCard";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
 import { useMenuDataStore } from "@/store/useMenuDataStore";
 
+const categoryFilters = [
+  "전체",
+  "가방",
+  "가죽 소품",
+  "패션 액세서리",
+  "의류",
+  "신발",
+] as const;
+
+type CategoryFilter = (typeof categoryFilters)[number];
+
 export function ItemsScreen() {
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryFilter>("전체");
   const [hasLoaded, setHasLoaded] = useState(false);
   const items = useMenuDataStore((state) => state.items);
   const isLoading = useMenuDataStore((state) => state.isLoading);
@@ -27,6 +40,14 @@ export function ItemsScreen() {
     loadPendingImageUpload();
     void loadItems().finally(() => setHasLoaded(true));
   }, [loadItems, loadPendingImageUpload]);
+
+  const filteredItems = useMemo(
+    () =>
+      selectedCategory === "전체"
+        ? items
+        : items.filter((item) => item.category === selectedCategory),
+    [items, selectedCategory],
+  );
 
   const isInitialLoading = !hasLoaded || (isLoading && items.length === 0);
 
@@ -46,7 +67,34 @@ export function ItemsScreen() {
           </p>
         </LuxuryReveal>
 
-        <section className="mt-9" aria-live="polite">
+        <LuxuryReveal delay={60}>
+          <div
+            aria-label="내 아이템 카테고리"
+            className="-mx-6 mt-8 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {categoryFilters.map((category) => {
+              const isSelected = category === selectedCategory;
+
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  aria-pressed={isSelected}
+                  className={`h-[38px] shrink-0 rounded-full border px-5 text-[12px] font-bold transition-colors ${
+                    isSelected
+                      ? "border-[#15151a] bg-[#15151a] text-white"
+                      : "border-[#d1d1d8] bg-white text-[#55555d] hover:border-[#a8a8af]"
+                  }`}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+        </LuxuryReveal>
+
+        <section className="mt-6" aria-live="polite">
         {pendingImageUpload ? (
           <LuxuryReveal delay={90}>
             <Link
@@ -99,16 +147,18 @@ export function ItemsScreen() {
               </div>
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <p className="rounded-[15px] border border-[#dedee2] bg-[#f6f6f8] px-5 py-10 text-center text-[13px] text-[#777780]">
-            등록한 아이템이 없습니다.
+            {selectedCategory === "전체"
+              ? "등록한 아이템이 없습니다."
+              : "이 카테고리에 등록한 아이템이 없습니다."}
           </p>
         ) : (
           <ul
             aria-label="내가 등록한 아이템 목록"
             className="space-y-4"
           >
-            {items.map((item, index) => (
+            {filteredItems.map((item, index) => (
               <li key={item.id}>
                 <LuxuryReveal delay={120 + index * 45}>
                   <ItemListCard

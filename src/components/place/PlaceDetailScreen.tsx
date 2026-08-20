@@ -98,9 +98,12 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
           <Link
             href="/place"
             aria-label="장소 매치 페이지로 이동"
-            className="flex size-9 items-center justify-center rounded-full border border-white bg-white text-[#55555d] shadow-[0_5px_18px_rgba(36,31,25,0.06)]"
+            className="group flex size-9 items-center justify-start bg-transparent text-[#121217] transition-colors hover:text-[#8b7355] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#15151a]"
           >
-            <span aria-hidden="true" className="pb-1.5 text-[26px] leading-none">
+            <span
+              aria-hidden="true"
+              className="-mt-px pb-1.5 text-[26px] leading-none"
+            >
               ‹
             </span>
           </Link>
