@@ -241,7 +241,7 @@ export default function AiRecommendPage() {
         </div>
       ) : null}
 
-      <LuxuryReveal className="mt-4" delay={210}>
+      <LuxuryReveal className="mt-10" delay={210}>
         <button
           type="button"
           disabled={!preview || isSaving}
