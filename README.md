@@ -144,7 +144,7 @@ GET /auth/oauth/{provider}
 | 장소 | `GET /places`, `GET /places/{placeId}`, StylePlan 장소 추천·저장 API |
 | 홈 | `GET /home` |
 
-STYLE_PLAN의 새 슬라이더 UI는 `casualFormalLevel`과 `neatGlamorousLevel`을 함께 1~10 정수로 보내며 `styleTags`는 빈 배열이 아니라 필드 자체를 생략합니다. AI Polling은 2초 간격, 최대 30초입니다.
+STYLE_PLAN의 새 슬라이더 UI는 `casualFormalLevel`과 `neatGlamorousLevel`을 함께 1~10 정수로 보내며 `styleTags`는 빈 배열이 아니라 필드 자체를 생략합니다. AI Polling은 2초부터 시작해 최대 5초 간격으로 늘어나며, 프론트 안전 제한은 90초입니다.
 
 현재 호출하지 않는 경로:
 
@@ -206,8 +206,8 @@ Backend v0.4는 고정 Polling 시간을 API 계약으로 강제하지 않습니
 
 | 항목 | 값 |
 | --- | ---: |
-| 조회 간격 | 2초 |
-| 최대 자동 조회 | 30초 |
+| 조회 간격 | 2초부터 시작해 최대 5초까지 점진적으로 증가 |
+| 최대 자동 조회 | 90초 |
 | 최대 시도 | 15회 |
 
 - `SUCCEEDED`와 `FAILED`에서 즉시 종료합니다.

@@ -4,7 +4,7 @@ import type { AiJob } from "@/types/api";
 
 export class AiJobPollingTimeoutError extends Error {
   constructor() {
-    super("AI 처리 시간이 30초를 초과했습니다. 같은 작업을 다시 확인해 주세요.");
+    super("AI 처리가 계속 진행 중입니다. 잠시 후 같은 작업을 다시 확인해 주세요.");
     this.name = "AiJobPollingTimeoutError";
   }
 }
@@ -68,12 +68,9 @@ export async function pollAiJob(
   signal?: AbortSignal,
 ): Promise<AiJob> {
   const deadline = Date.now() + aiJobPollingPolicy.timeoutMs;
+  let intervalMs: number = aiJobPollingPolicy.initialIntervalMs;
 
-  for (
-    let attempt = 0;
-    attempt < aiJobPollingPolicy.maxAttempts;
-    attempt += 1
-  ) {
+  while (Date.now() < deadline) {
     const response = await getJobBeforeDeadline(jobId, deadline, signal);
     const job = response.data.data;
 
@@ -87,8 +84,13 @@ export async function pollAiJob(
     }
 
     await waitForNextPoll(
-      Math.min(aiJobPollingPolicy.intervalMs, remainingMs),
+      Math.min(intervalMs, remainingMs),
       signal,
+    );
+
+    intervalMs = Math.min(
+      intervalMs * aiJobPollingPolicy.backoffMultiplier,
+      aiJobPollingPolicy.maximumIntervalMs,
     );
   }
 

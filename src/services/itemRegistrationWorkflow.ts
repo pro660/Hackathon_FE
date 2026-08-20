@@ -107,6 +107,7 @@ export async function analyzeItemPhoto(
         context: { imageAssetId: image.imageAssetId },
       },
       createIdempotencyKey(),
+      signal,
     );
 
     jobId = acceptedResponse.data.data.jobId;

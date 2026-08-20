@@ -91,9 +91,10 @@ type PlaceSearchQuery = {
 };
 
 export const aiJobPollingPolicy = {
-  intervalMs: 2_000,
-  timeoutMs: 30_000,
-  maxAttempts: 15,
+  initialIntervalMs: 2_000,
+  maximumIntervalMs: 5_000,
+  backoffMultiplier: 1.5,
+  timeoutMs: 90_000,
 } as const;
 
 function validateStylePlanRequest(body: AiJobRequest) {
@@ -117,11 +118,16 @@ function validateStylePlanRequest(body: AiJobRequest) {
 }
 
 export const intelligenceApi = {
-  createAiJob: (body: AiJobRequest, idempotencyKey: string) => {
+  createAiJob: (
+    body: AiJobRequest,
+    idempotencyKey: string,
+    signal?: AbortSignal,
+  ) => {
     validateStylePlanRequest(body);
     return api.post<ApiSuccessResponse<AiJobAccepted>>("/ai-jobs", body, {
       headers: { "Idempotency-Key": idempotencyKey },
       timeout: 20_000,
+      signal,
     });
   },
 

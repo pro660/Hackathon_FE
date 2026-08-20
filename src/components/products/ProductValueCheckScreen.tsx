@@ -8,7 +8,10 @@ import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayou
 import { AnimatedCounter } from "@/components/common/motion/AnimatedCounter";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
+import { getApiErrorCode, getApiErrorMessage } from "@/lib/apiError";
+import { AiJobPollingTimeoutError } from "@/services/aiJobPolling";
 import {
+  PurchaseUtilityJobFailedError,
   PurchaseUtilityInsufficientDataError,
   requestPurchaseUtilityAnalysis,
 } from "@/services/purchaseUtilityWorkflow";
@@ -19,6 +22,7 @@ type ProductValueCheckScreenProps = { productId?: string };
 export function ProductValueCheckScreen({ productId }: ProductValueCheckScreenProps) {
   const [analysis, setAnalysis] = useState<PurchaseUtilityAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!productId) return;
@@ -28,15 +32,14 @@ export function ProductValueCheckScreen({ productId }: ProductValueCheckScreenPr
       .then(setAnalysis)
       .catch((analysisError: unknown) => {
         if (controller.signal.aborted) return;
-        setError(
-          analysisError instanceof PurchaseUtilityInsufficientDataError
-            ? analysisError.message
-            : "활용 가능성을 계산하지 못했습니다. 다시 시도해 주세요.",
-        );
+        if (process.env.NODE_ENV !== "production") {
+          console.error("구매 활용성 분석 실패", analysisError);
+        }
+        setError(getAnalysisErrorMessage(analysisError));
       });
 
     return () => controller.abort();
-  }, [productId]);
+  }, [attempt, productId]);
 
   return (
     <MobileScreenLayout
@@ -64,9 +67,21 @@ export function ProductValueCheckScreen({ productId }: ProductValueCheckScreenPr
         ) : null}
 
         {error ? (
-          <p role="alert" className="mt-8 rounded-[16px] bg-[#f8eeee] px-4 py-4 text-[12px] text-[#9a4545]">
-            {error}
-          </p>
+          <div className="mt-8 rounded-[16px] bg-[#f8eeee] px-4 py-4 text-center">
+            <p role="alert" className="text-[12px] leading-5 text-[#9a4545]">
+              {error}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setAttempt((current) => current + 1);
+              }}
+              className="mt-3 rounded-full border border-[#d9bcbc] px-4 py-2 text-[11px] font-semibold text-[#824242]"
+            >
+              다시 확인
+            </button>
+          </div>
         ) : null}
 
         {analysis ? (
@@ -117,6 +132,33 @@ export function ProductValueCheckScreen({ productId }: ProductValueCheckScreenPr
         ) : null}
       </div>
     </MobileScreenLayout>
+  );
+}
+
+function getAnalysisErrorMessage(error: unknown) {
+  if (error instanceof PurchaseUtilityInsufficientDataError) {
+    return error.message;
+  }
+
+  if (error instanceof PurchaseUtilityJobFailedError) {
+    return error.message;
+  }
+
+  if (error instanceof AiJobPollingTimeoutError) {
+    return error.message;
+  }
+
+  const errorCode = getApiErrorCode(error);
+  if (errorCode === "AI_JOB_ALREADY_RUNNING") {
+    return "다른 AI 분석이 진행 중입니다. 완료된 후 다시 확인해 주세요.";
+  }
+  if (errorCode === "AI_DAILY_LIMIT_EXCEEDED") {
+    return "오늘 사용할 수 있는 AI 분석 횟수를 모두 사용했습니다.";
+  }
+
+  return getApiErrorMessage(
+    error,
+    "네트워크 연결을 확인한 뒤 다시 시도해 주세요.",
   );
 }
 

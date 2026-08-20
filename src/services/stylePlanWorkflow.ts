@@ -10,6 +10,7 @@ export async function requestStylePlanPreview(
   const accepted = await backendApi.intelligence.createAiJob(
     { type: "STYLE_PLAN", context },
     idempotencyKey,
+    signal,
   );
 
   return pollAiJob(accepted.data.data.jobId, signal);
