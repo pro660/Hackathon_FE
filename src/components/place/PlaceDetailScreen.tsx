@@ -125,18 +125,7 @@ export function PlaceDetailScreen({
     >
       <div className="flex min-h-full w-full flex-col">
         <LuxuryReveal>
-          <Link
-            href={placeMatchHref}
-            aria-label="장소 매치 페이지로 이동"
-            className="group flex size-9 items-center justify-start bg-transparent text-[#121217] transition-colors hover:text-[#8b7355] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#15151a]"
-          >
-            <span
-              aria-hidden="true"
-              className="-mt-px pb-1.5 text-[26px] leading-none"
-            >
-              ‹
-            </span>
-          </Link>
+          <BackButton />
           <h1 className="text-[17px] leading-5 font-bold text-[#0e0e12]">
             {place.name}
           </h1>

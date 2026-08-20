@@ -10,8 +10,10 @@ import {
 import { useRouter } from "next/navigation";
 
 import { FilterMenu } from "@/components/common/filter/FilterMenu";
+import { ConfirmDialog } from "@/components/common/feedback/ConfirmDialog";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { getApiErrorCode, getApiErrorMessage } from "@/lib/apiError";
 import { backendApi } from "@/services/api";
@@ -136,6 +138,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -223,7 +226,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
   };
 
   const deleteItem = async () => {
-    if (isDeleting || !window.confirm("이 아이템을 삭제하시겠습니까?")) return;
+    if (isDeleting) return;
     setIsDeleting(true);
     setErrorMessage(null);
     try {
@@ -233,6 +236,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, "아이템을 삭제하지 못했습니다."));
       setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -244,7 +248,8 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
     >
       <form className="flex min-h-full flex-col" onSubmit={handleSubmit}>
         <LuxuryReveal>
-          <h1 className="text-[17px] leading-6 font-bold">제품 정보 수정</h1>
+          <BackButton />
+          <h1 className="mt-1 text-[17px] leading-6 font-bold">제품 정보 수정</h1>
         </LuxuryReveal>
 
         {!hasLoaded ? (
@@ -300,7 +305,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
               <label className="flex h-8 items-center rounded-full border border-[#ded9d1] bg-[#f4f1ec] px-3 text-[10px] text-[#4b4741] focus-within:border-[#8b7355]">
                 <input maxLength={200} value={draft.purchasePlace} placeholder="구매처" aria-label="구매처" className="w-full bg-transparent text-center outline-none placeholder:text-[#4b4741]" onChange={(event) => updateDraft({ purchasePlace: event.target.value })} />
               </label>
-              <button type="button" disabled={isDeleting} onClick={() => void deleteItem()} className="h-8 rounded-full border border-[#e6c7c0] bg-[#fff5f3] text-[10px] text-[#4b4741] disabled:opacity-45">{isDeleting ? "삭제 중" : "아이템 삭제"}</button>
+              <button type="button" disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(true)} className="h-8 rounded-full border border-[#e6c7c0] bg-[#fff5f3] text-[10px] text-[#4b4741] disabled:opacity-45">{isDeleting ? "삭제 중" : "아이템 삭제"}</button>
             </div>
           </LuxuryReveal>
         )}
@@ -315,6 +320,18 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
           </button>
         </LuxuryReveal>
       </form>
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        title="아이템을 삭제하시겠습니까?"
+        description="삭제한 아이템은 복구할 수 없습니다."
+        confirmLabel="삭제하기"
+        isPending={isDeleting}
+        pendingLabel="삭제 중..."
+        onConfirm={() => void deleteItem()}
+        onCancel={() => {
+          if (!isDeleting) setIsDeleteDialogOpen(false);
+        }}
+      />
     </MobileScreenLayout>
   );
 }

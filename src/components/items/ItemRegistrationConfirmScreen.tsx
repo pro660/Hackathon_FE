@@ -263,7 +263,10 @@ export function ItemRegistrationConfirmScreen() {
         </LuxuryReveal>
 
         <form className="flex flex-1 flex-col" onSubmit={handleSubmit}>
-          <LuxuryReveal className="mt-[68px]" delay={60}>
+          <LuxuryReveal
+            className={`relative mt-[68px] ${openFilter ? "z-[9999]" : "z-0"}`}
+            delay={60}
+          >
             <div className="space-y-3">
               <input aria-label="제품명" value={draft.name} maxLength={200} placeholder="제품명 · Aren Shopper" className={fieldClassName} onChange={(event) => updateDraft({ name: event.target.value })} />
               <input aria-label="브랜드" value={draft.brandName} maxLength={100} placeholder="브랜드 · MCM" className={fieldClassName} onChange={(event) => updateDraft({ brandName: event.target.value })} />

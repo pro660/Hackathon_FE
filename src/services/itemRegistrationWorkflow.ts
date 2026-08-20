@@ -31,7 +31,10 @@ export type ItemAnalysisOutcome =
     };
 
 function createIdempotencyKey() {
-  return globalThis.crypto?.randomUUID?.() ?? `item-analysis-${Date.now()}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    `item-analysis-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
 }
 
 function validateImage(file: File) {

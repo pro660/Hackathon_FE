@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { analyzeItemPhoto } from "@/services/itemRegistrationWorkflow";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
@@ -38,6 +39,7 @@ export function ItemRegisterScreen() {
   const applyAnalysis = useItemRegistrationStore((state) => state.applyAnalysis);
   const failAnalysis = useItemRegistrationStore((state) => state.failAnalysis);
   const [isRecognizing, setIsRecognizing] = useState(false);
+  const [analysisFailure, setAnalysisFailure] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -76,28 +78,52 @@ export function ItemRegisterScreen() {
 
     transitionLockRef.current = true;
     setIsRecognizing(true);
+    setAnalysisFailure(null);
     setError(null);
     startAnalysis();
+
+    let movedToConfirmation = false;
 
     try {
       const outcome = await analyzeItemPhoto(photoFile);
 
       if (outcome.status === "SUCCEEDED") {
         applyAnalysis(outcome.values, outcome.jobId, outcome.image);
+        movedToConfirmation = true;
+        moveToConfirmation();
       } else {
         failAnalysis(outcome.message, outcome.image);
+        setAnalysisFailure(outcome.message);
       }
-
-      moveToConfirmation();
     } catch (recognitionError) {
       const message =
         recognitionError instanceof Error
           ? recognitionError.message
           : "제품 정보를 인식하지 못했어요. 직접 입력해 주세요.";
       failAnalysis(message);
-      moveToConfirmation();
+      setAnalysisFailure(message);
+    } finally {
+      if (!movedToConfirmation) {
+        transitionLockRef.current = false;
+        setIsRecognizing(false);
+      }
     }
   };
+
+  if (isRecognizing) {
+    return <ItemAnalysisState mode="loading" />;
+  }
+
+  if (analysisFailure) {
+    return (
+      <ItemAnalysisState
+        mode="failed"
+        message={analysisFailure}
+        onRetry={() => void handlePrimaryAction()}
+        onDirectInput={moveToConfirmation}
+      />
+    );
+  }
 
   return (
     <MobileScreenLayout
@@ -182,6 +208,54 @@ export function ItemRegisterScreen() {
                 : "직접 입력하기"}
           </button>
         </div>
+      </div>
+    </MobileScreenLayout>
+  );
+}
+
+type ItemAnalysisStateProps = {
+  mode: "loading" | "failed";
+  message?: string;
+  onRetry?: () => void;
+  onDirectInput?: () => void;
+};
+
+function ItemAnalysisState({ mode, message, onRetry, onDirectInput }: ItemAnalysisStateProps) {
+  const isLoading = mode === "loading";
+
+  return (
+    <MobileScreenLayout
+      figmaNodeId={isLoading ? "119:1905" : "119:1943"}
+      contentClassName="flex bg-white px-6 pt-4 pb-8 text-[#0e0e12]"
+      bottomNavigation={<BottomNavigation activeItem="register" />}
+    >
+      <div className="flex min-h-full w-full flex-col">
+        <LuxuryReveal>
+          <BackButton />
+          <h1 className="mt-1 text-[17px] leading-6 font-bold">제품 사진 등록</h1>
+          <p className="mt-5 text-[13px] leading-5 text-[#6e707a]">AI가 확인 가능한 정보를 제안해요</p>
+        </LuxuryReveal>
+
+        <LuxuryReveal className="my-auto text-center" delay={70}>
+          <h2 className="text-[24px] leading-8 font-bold tracking-[-0.035em]">
+            {isLoading ? "AI 분석 중" : "분석하지 못했어요"}
+          </h2>
+          <p className="mx-auto mt-5 max-w-[294px] text-[14px] leading-5 text-[#75706b]">
+            {isLoading
+              ? "사진에서 제품명·브랜드·카테고리·색상·소재를 확인하고 있어요."
+              : message ?? "사진을 다시 분석하거나 직접 정보를 입력해 주세요."}
+          </p>
+          {isLoading ? (
+            <div className="mx-auto mt-8 flex items-center justify-center gap-2" aria-label="분석 진행 중">
+              {[0, 1, 2].map((index) => <span key={index} className="size-2 animate-pulse rounded-full bg-[#17171c]" style={{ animationDelay: `${index * 140}ms` }} />)}
+            </div>
+          ) : (
+            <div className="mx-auto mt-9 grid max-w-[294px] grid-cols-2 gap-3">
+              <button type="button" onClick={onRetry} className="h-[52px] rounded-[16px] bg-[#14120f] text-[14px] font-bold text-white">다시 분석</button>
+              <button type="button" onClick={onDirectInput} className="h-[52px] rounded-[16px] border border-[#e0dbd1] bg-white text-[14px] font-bold text-[#14120f]">직접 입력</button>
+            </div>
+          )}
+        </LuxuryReveal>
       </div>
     </MobileScreenLayout>
   );

@@ -55,8 +55,10 @@ export const closetApi = {
       params,
     }),
 
-  getItem: (myItemId: string) =>
-    api.get<ApiSuccessResponse<MyItemDetail>>(`/my-items/${myItemId}`),
+  getItem: (myItemId: string, signal?: AbortSignal) =>
+    api.get<ApiSuccessResponse<MyItemDetail>>(`/my-items/${myItemId}`, {
+      signal,
+    }),
 
   createItem: (body: CreateMyItemRequest) =>
     api.post<ApiSuccessResponse<{ myItemId: string }>>("/my-items", body),
@@ -66,9 +68,10 @@ export const closetApi = {
 
   deleteItem: (myItemId: string) => api.delete<void>(`/my-items/${myItemId}`),
 
-  getProductPassport: (myItemId: string) =>
+  getProductPassport: (myItemId: string, signal?: AbortSignal) =>
     api.get<ApiSuccessResponse<ProductPassport>>(
       `/my-items/${myItemId}/passport`,
+      { signal },
     ),
 
   uploadImageAsset: (file: File, signal?: AbortSignal) => {
@@ -91,23 +94,27 @@ export const closetApi = {
   removeImage: (myItemId: string, imageAssetId: string) =>
     api.delete<void>(`/my-items/${myItemId}/images/${imageAssetId}`),
 
-  getCareGuide: (myItemId: string) =>
-    api.get<ApiSuccessResponse<CareGuide>>(`/my-items/${myItemId}/care-guide`),
+  getCareGuide: (myItemId: string, signal?: AbortSignal) =>
+    api.get<ApiSuccessResponse<CareGuide>>(`/my-items/${myItemId}/care-guide`, {
+      signal,
+    }),
 
-  getStorageGuide: (myItemId: string) =>
+  getStorageGuide: (myItemId: string, signal?: AbortSignal) =>
     api.get<ApiSuccessResponse<StorageGuide>>(
       `/my-items/${myItemId}/storage-guide`,
+      { signal },
     ),
 
-  getCareCalendar: (myItemId: string, month: string) =>
+  getCareCalendar: (myItemId: string, month: string, signal?: AbortSignal) =>
     api.get<ApiSuccessResponse<CareCalendar>>(
       `/my-items/${myItemId}/care-calendar`,
-      { params: { month } },
+      { params: { month }, signal },
     ),
 
-  getCareReminderSetting: (myItemId: string) =>
+  getCareReminderSetting: (myItemId: string, signal?: AbortSignal) =>
     api.get<ApiSuccessResponse<CareReminderSetting>>(
       `/my-items/${myItemId}/care-reminder-setting`,
+      { signal },
     ),
 
   updateCareReminderSetting: (myItemId: string, enabled: boolean) =>

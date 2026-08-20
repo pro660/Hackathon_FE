@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FilterMenu } from "@/components/common/filter/FilterMenu";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ItemListCard } from "@/components/items/ItemListCard";
 import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
@@ -129,7 +130,8 @@ export function ItemsScreen() {
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
-          <h1 className="text-[17px] leading-5 font-bold tracking-[-0.02em]">
+          <BackButton />
+          <h1 className="mt-1 text-[17px] leading-5 font-bold tracking-[-0.02em]">
             내 아이템
           </h1>
           <p className="mt-8 text-[13px] leading-4 text-[#85858f]">
@@ -237,13 +239,24 @@ export function ItemsScreen() {
               </div>
             ))}
           </div>
+        ) : items.length === 0 ? (
+          <LuxuryReveal className="py-[116px] text-center" delay={100}>
+            <h2 className="text-[24px] leading-8 font-bold tracking-[-0.035em] text-[#14120f]">
+              등록된 아이템이 없어요
+            </h2>
+            <p className="mx-auto mt-5 max-w-[280px] text-[14px] leading-5 text-[#75706b]">
+              아이템을 등록하면 맞춤 관리와 제품 패스포트를 이용할 수 있어요.
+            </p>
+            <Link
+              href="/items/new"
+              className="mx-auto mt-9 flex h-[52px] max-w-[294px] items-center justify-center rounded-[16px] bg-[#14120f] text-[14px] font-bold text-white"
+            >
+              새 아이템 등록
+            </Link>
+          </LuxuryReveal>
         ) : filteredItems.length === 0 ? (
           <p className="rounded-[15px] border border-[#dedee2] bg-[#f6f6f8] px-5 py-10 text-center text-[13px] text-[#777780]">
-            {selectedCategory === "전체" &&
-            selectedColor === "전체" &&
-            !searchQuery.trim()
-              ? "등록한 아이템이 없습니다."
-              : "검색 조건에 맞는 아이템이 없습니다."}
+            검색 조건에 맞는 아이템이 없습니다.
           </p>
         ) : (
           <ul
@@ -273,14 +286,14 @@ export function ItemsScreen() {
         )}
         </section>
 
-        <LuxuryReveal className="mt-auto pt-8" delay={300}>
+        {items.length > 0 ? <LuxuryReveal className="mt-auto pt-8" delay={300}>
           <Link
             href="/items/new"
             className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#15151a] text-[14px] font-bold text-white transition-colors hover:bg-[#2a2a30] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#15151a]"
           >
             새 제품 등록
           </Link>
-        </LuxuryReveal>
+        </LuxuryReveal> : null}
       </div>
     </MobileScreenLayout>
   );
