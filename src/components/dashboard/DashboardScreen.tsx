@@ -173,88 +173,32 @@ async function fetchLocationLabel(
   return pickBestLocationLabel(geocodeData.address ?? {}, "현재 위치");
 }
 
-const actionCards = [
-  {
-    title: "스마트 착용 추천",
-    description: "세부 정보를 확인하세요",
-    href: "/personalize",
-  },
-  {
-    title: "내 제품 관리 알림",
-    description: "소재별 관리 안내와 일정을 확인하세요",
-    href: "/care/calendar",
-  },
-  {
-    title: "구매 전 활용 체크",
-    description: "세부 정보를 확인하세요",
-    href: "/recommendations",
-  },
-];
-
-function ActionCard({
-  title,
-  description,
-  href,
-}: {
-  title: string;
-  description: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex h-[72px] items-center gap-3 rounded-[18px] border border-[#e5e2de] bg-[#faf9f7] px-[14px] transition-transform active:scale-[0.99]"
-    >
-      <div className="h-[44px] w-[44px] shrink-0 rounded-[14px] bg-[#ece6dc]" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-bold leading-[18px] text-[#15151a]">
-          {title}
-        </p>
-        <p className="mt-[3px] text-[12px] leading-[14px] text-[#9898a0]">
-          {description}
-        </p>
-      </div>
-      <span
-        aria-hidden="true"
-        className="text-[28px] leading-none text-[#7d7d86]"
-      >
-        ›
-      </span>
-    </Link>
-  );
-}
-
 function ProductRowCard({
   title,
-  subtitle,
   href,
   imageUrl,
 }: {
   title: string;
-  subtitle: string;
   href: string;
   imageUrl?: string;
 }) {
   return (
     <Link
       href={href}
-      className="flex h-[72px] items-center gap-3 rounded-[18px] border border-[#e5e2de] bg-[#faf9f7] px-[14px] transition-transform active:scale-[0.99]"
+      className="flex h-[62px] items-center rounded-[15px] border border-[#dbdee3] bg-[#f6f6f8] px-3 transition-transform active:scale-[0.99]"
     >
       <div
-        className="flex size-[52px] shrink-0 items-center justify-center rounded-[15px] bg-[#ece6dc] bg-cover bg-center"
+        className="size-[46px] shrink-0 rounded-[11px] bg-[#e8e3d9] bg-cover bg-center"
         style={imageUrl ? { backgroundImage: `url("${imageUrl}")` } : undefined}
       />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-bold leading-[18px] text-[#15151a]">
+      <div className="ml-4 min-w-0 flex-1">
+        <p className="truncate text-[14px] leading-[18px] font-bold text-[#0e0e12]">
           {title}
-        </p>
-        <p className="mt-[3px] truncate text-[12px] leading-[14px] text-[#9898a0]">
-          {subtitle}
         </p>
       </div>
       <span
         aria-hidden="true"
-        className="text-[28px] leading-none text-[#7d7d86]"
+        className="ml-3 text-[18px] leading-none text-[#6e707a]"
       >
         ›
       </span>
@@ -362,23 +306,26 @@ export function DashboardScreen() {
   }, []);
 
   const nickname = profile?.nickname?.trim() || "사용자";
+  const nicknameWithHonorific = nickname.endsWith("님")
+    ? nickname
+    : `${nickname}님`;
 
   return (
     <MobileScreenLayout
-      figmaNodeId="96:142"
-      contentClassName="bg-white px-6 pt-[46px] pb-8"
+      figmaNodeId="147:240"
+      contentClassName="bg-white px-6 pt-[50px] pb-12"
       bottomNavigation={<BottomNavigation activeItem="home" />}
     >
       <section className="text-[#15151a]">
         <LuxuryReveal>
           <div>
-            <p className="text-[11px] font-bold tracking-[0.02em] text-[#8b7355]">
-              GOOD MORNING, {nickname.toUpperCase()}
+            <p className="text-[12px] leading-[17px] font-bold text-[#b89666]">
+              좋은 아침이에요, {nicknameWithHonorific}
             </p>
-            <h1 className="mt-[6px] text-[28px] leading-[1.14] font-bold tracking-[-0.05em]">
+            <h1 className="mt-[11px] text-[27px] leading-8 font-bold tracking-[-0.04em] text-[#0e0e12]">
               오늘 뭐 입을래?
             </h1>
-            <p className="mt-[8px] text-[14px] leading-[1.35] text-[#777780]">
+            <p className="mt-3 text-[13px] leading-4 text-[#6e707a]">
               {weather ? (
                 <span className="whitespace-nowrap">
                   {weather.temperature}° · {weather.condition} ·{" "}
@@ -391,57 +338,54 @@ export function DashboardScreen() {
           </div>
         </LuxuryReveal>
 
-        <LuxuryReveal className="mt-10" delay={80}>
-          <article className="overflow-hidden rounded-[22px] bg-[#16161b] px-5 py-[22px] shadow-[0_12px_30px_rgba(22,22,27,0.12)]">
-            <p className="text-[12px] font-bold tracking-[0.02em] text-[#b89a72]">
-              최근 스타일 플랜
+        <LuxuryReveal className="mt-5" delay={80}>
+          <article className="h-[165px] overflow-hidden rounded-[18px] bg-[#0e0e12] px-5 pt-5">
+            <p className="text-[12px] leading-[17px] font-bold text-[#b89666]">
+              오늘의 스타일 플랜
             </p>
-            <h2 className="mt-4 max-w-[230px] text-[22px] font-bold leading-[1.2] tracking-[-0.04em] text-white">
+            <h2 className="mt-4 line-clamp-2 h-12 max-w-[280px] text-[20px] leading-6 font-bold tracking-[-0.03em] text-white">
               {homeData?.latestStylePlan?.title ??
                 "아직 저장한 스타일 플랜이 없어요"}
             </h2>
+            <Link
+              href="/personalize"
+              className="mt-[14px] flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
+            >
+              스마트 착용 추천&nbsp; ›
+            </Link>
           </article>
         </LuxuryReveal>
 
-        <div className="mt-8 space-y-4">
-          {actionCards.map((card, index) => (
-            <LuxuryReveal key={card.title} delay={160 + index * 70}>
-              <ActionCard
-                {...card}
-                href={
-                  card.title === "구매 전 활용 체크"
-                    ? purchaseUtilityHref
-                    : card.href
-                }
-              />
-            </LuxuryReveal>
-          ))}
-        </div>
+        <LuxuryReveal className="mt-4 grid grid-cols-2 gap-4" delay={160}>
+          <Link
+            href="/care/calendar"
+            className="flex h-[54px] items-center justify-center rounded-[14px] border border-[#dbdee3] bg-[#f7f7f8] px-3 text-center text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#f1f1f3]"
+          >
+            내 제품 관리 알림
+          </Link>
+          <Link
+            href={purchaseUtilityHref}
+            className="flex h-[54px] items-center justify-center rounded-[14px] border border-[#dbdee3] bg-[#f7f7f8] px-3 text-center text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#f1f1f3]"
+          >
+            구매 전 활용 체크
+          </Link>
+        </LuxuryReveal>
 
-        <LuxuryReveal className="mt-10" delay={390}>
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <h2 className="mt-1 text-[20px] font-bold tracking-[-0.035em]">
-                MCM 제품
-              </h2>
-              <p className="mt-[10px] text-[13px] leading-4 text-[#777780]">
-                취향과 잘 맞는 제품을 더 둘러보세요
-              </p>
-            </div>
-            <Link
-              href="/products"
-              className="text-[11px] font-bold text-[#777780]"
-            >
-              더보기
-            </Link>
+        <LuxuryReveal className="mt-5" delay={300}>
+          <div className="mb-4">
+            <h2 className="text-[16px] leading-5 font-bold text-[#0e0e12]">
+              MCM 제품
+            </h2>
+            <p className="mt-1.5 text-[12px] leading-4 text-[#6e707a]">
+              취향과 잘 맞는 제품을 더 둘러보세요
+            </p>
           </div>
-          <ul className="space-y-[10px]">
-            {products.slice(0, 4).map((product) => (
+          <ul className="space-y-2">
+            {products.slice(0, 3).map((product) => (
               <li key={product.id}>
                 <ProductRowCard
                   href={`/recommendations/${product.id}`}
                   title={product.displayName}
-                  subtitle={product.modelName}
                   imageUrl={product.imageUrl}
                 />
               </li>
@@ -458,9 +402,7 @@ export function DashboardScreen() {
             </p>
           ) : null}
         </LuxuryReveal>
-
       </section>
-
     </MobileScreenLayout>
   );
 }

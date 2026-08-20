@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ImageGridCard, ImageGridSkeleton } from "@/components/common/card/ImageGridCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { BackButton } from "@/components/common/navigation/BackButton";
+import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ScreenHeader } from "@/components/common/section/ScreenHeader";
 import { backendApi } from "@/services/api";
 import type { ProductSummary } from "@/types/api";
@@ -23,7 +24,10 @@ export function WishlistScreen() {
   }, []);
 
   return (
-    <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-8">
+    <MobileScreenLayout
+      contentClassName="bg-white px-6 pt-4 pb-8"
+      bottomNavigation={<BottomNavigation activeItem="my" />}
+    >
       <BackButton />
       <div className="mt-5"><ScreenHeader eyebrow="WISHLIST" title="찜한 제품" description="저장해 둔 제품을 확인해요" /></div>
       <section className="mt-8">

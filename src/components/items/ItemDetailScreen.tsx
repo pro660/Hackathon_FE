@@ -34,7 +34,7 @@ export function ItemDetailScreen({ itemId }: ItemDetailScreenProps) {
 
   if (!item && isLoading) {
     return (
-      <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-[88px]">
+      <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-8">
         <div className="flex min-h-full flex-col">
           <div className="flex items-center gap-2">
             <BackButton variant="plain" />
@@ -88,7 +88,7 @@ export function ItemDetailScreen({ itemId }: ItemDetailScreenProps) {
   return (
     <MobileScreenLayout
       figmaNodeId="390:327"
-      contentClassName="bg-white px-6 pt-4 pb-[88px] text-[#121217]"
+      contentClassName="bg-white px-6 pt-4 pb-8 text-[#121217]"
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>

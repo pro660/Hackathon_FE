@@ -5,6 +5,7 @@ import { useEffect, useMemo } from "react";
 import { DetailActionCard } from "@/components/common/card/DetailActionCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { ScreenHeader } from "@/components/common/section/ScreenHeader";
 import { usePlaceStore } from "@/store/usePlaceStore";
@@ -28,10 +29,14 @@ export function SavedPlacesScreen() {
   return (
     <MobileScreenLayout
       figmaNodeId="390:195"
-      contentClassName="bg-white px-6 pt-[47px] pb-8"
+      contentClassName="bg-white px-6 pt-4 pb-8"
       bottomNavigation={<BottomNavigation activeItem="my" />}
     >
       <LuxuryReveal>
+        <BackButton />
+      </LuxuryReveal>
+
+      <LuxuryReveal className="mt-5" delay={40}>
         <ScreenHeader
           eyebrow="SAVED PLACES"
           title="저장한 장소"
