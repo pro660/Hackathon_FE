@@ -1,6 +1,15 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import {
+  PiBuildingsBold,
+  PiCoffeeBold,
+  PiForkKnifeBold,
+  PiMapPinBold,
+  PiPaletteBold,
+  PiStorefrontBold,
+  PiTreeBold,
+} from "react-icons/pi";
 
 import { DetailActionCard } from "@/components/common/card/DetailActionCard";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
@@ -71,11 +80,9 @@ export function SavedPlacesScreen() {
               description={`저장됨 · ${place.category} · ${place.area}`}
               href={`/place/${encodeURIComponent(place.id)}`}
               leading={
-                <span
-                  aria-hidden="true"
-                  className="size-full"
-                  style={{ backgroundColor: place.thumbnailColor }}
-                />
+                <span className="flex size-full items-center justify-center bg-[#e9e5df] text-[#7d684a]">
+                  {getPlaceCategoryIcon(place.category)}
+                </span>
               }
             />
           </LuxuryReveal>
@@ -83,4 +90,39 @@ export function SavedPlacesScreen() {
       </section>
     </MobileScreenLayout>
   );
+}
+
+function getPlaceCategoryIcon(category: string) {
+  const normalized = category.toLocaleLowerCase("ko-KR");
+  const iconClassName = "size-[22px]";
+
+  if (includesAny(normalized, ["카페", "커피", "cafe", "coffee", "베이커리"])) {
+    return <PiCoffeeBold aria-label="카페" className={iconClassName} />;
+  }
+
+  if (includesAny(normalized, ["음식", "맛집", "식당", "레스토랑", "food", "restaurant"])) {
+    return <PiForkKnifeBold aria-label="음식점" className={iconClassName} />;
+  }
+
+  if (includesAny(normalized, ["전시", "미술", "갤러리", "박물관", "museum", "gallery"])) {
+    return <PiPaletteBold aria-label="전시 공간" className={iconClassName} />;
+  }
+
+  if (includesAny(normalized, ["공원", "자연", "산", "정원", "park", "outdoor"])) {
+    return <PiTreeBold aria-label="야외 공간" className={iconClassName} />;
+  }
+
+  if (includesAny(normalized, ["쇼핑", "상점", "스토어", "백화점", "shop", "store"])) {
+    return <PiStorefrontBold aria-label="쇼핑 공간" className={iconClassName} />;
+  }
+
+  if (includesAny(normalized, ["호텔", "숙박", "hotel", "stay"])) {
+    return <PiBuildingsBold aria-label="숙박 시설" className={iconClassName} />;
+  }
+
+  return <PiMapPinBold aria-label="장소" className={iconClassName} />;
+}
+
+function includesAny(value: string, keywords: readonly string[]) {
+  return keywords.some((keyword) => value.includes(keyword));
 }

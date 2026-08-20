@@ -382,7 +382,7 @@ export function DashboardScreen() {
               </p>
             </div>
             <Link
-              href="/recommendations"
+              href="/products"
               className="shrink-0 pb-0.5 text-[11px] font-bold text-[#6e707a] transition-colors hover:text-[#0e0e12]"
             >
               더보기&nbsp; ›
@@ -392,7 +392,7 @@ export function DashboardScreen() {
             {products.slice(0, 3).map((product) => (
               <li key={product.id}>
                 <ProductRowCard
-                  href={`/recommendations/${product.id}`}
+                  href={`/products/${product.id}`}
                   title={product.displayName}
                   imageUrl={product.imageUrl}
                 />

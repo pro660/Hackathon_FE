@@ -37,7 +37,7 @@ export function WishlistScreen() {
         <ul className="grid grid-cols-2 gap-3">
           {products.map((product) => (
             <li key={product.productId}>
-              <Link href={`/recommendations/${product.productId}`}>
+              <Link href={`/products/${product.productId}`}>
                 <ImageGridCard title={product.name} subtitle={product.brand} imageAlt={`${product.name} 제품 이미지`} imageUrl={product.primaryImageUrl ?? undefined} fallbackLabel="PRODUCT" />
               </Link>
             </li>

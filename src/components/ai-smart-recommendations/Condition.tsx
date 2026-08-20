@@ -10,6 +10,7 @@ import { BackButton } from "@/components/common/navigation/BackButton";
 import {
   createMoodConditionDefaults,
   createStylePlanSliderContext,
+  clearPreparedStylePlanPreview,
   readSelectedSmartMoods,
   stylePlanContextStorageKey,
 } from "@/lib/stylePlanDraft";
@@ -148,7 +149,9 @@ export default function ConditionPage() {
       JSON.stringify(context),
     );
 
-    router.push("/smart-recommendations/result");
+    clearPreparedStylePlanPreview();
+
+    router.push("/smart-recommendations/loading");
   };
 
   return (

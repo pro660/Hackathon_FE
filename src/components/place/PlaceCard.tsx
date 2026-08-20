@@ -43,14 +43,6 @@ export function PlaceCard({
         <span className="block truncate text-[14px] leading-[17px] font-bold text-[#15151a]">
           {place.name}
         </span>
-        <span
-          aria-live="polite"
-          className={`mt-[7px] block truncate text-[11px] leading-[13px] ${
-            detailReady ? "font-bold text-[#8b7355]" : "text-[#888890]"
-          }`}
-        >
-          {detailReady ? "한 번 더 눌러 상세 보기" : place.description}
-        </span>
       </span>
 
       <span

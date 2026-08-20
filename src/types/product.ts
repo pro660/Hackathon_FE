@@ -27,10 +27,12 @@ export type RecommendedProduct = {
   recommendationReason?: string;
   price: number;
   imageUrl?: string;
+  favorited: boolean;
 };
 
 export type RecommendationCriteria = {
   occasion: OccasionTag | "";
   season: CurrentSeasonTag | "";
   preferredFeatures: FeatureTag[];
+  category: ItemCategory | "ALL";
 };

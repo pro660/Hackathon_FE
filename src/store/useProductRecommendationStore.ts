@@ -11,8 +11,10 @@ type ProductRecommendationState = {
   products: RecommendedProduct[];
   status: LoadStatus;
   error: string | null;
+  hasRecommendationResult: boolean;
   loadProducts: (category?: ProductCategoryFilter) => () => void;
   loadRecommendations: (criteria: RecommendationCriteria) => () => void;
+  setProductFavorited: (productId: string, favorited: boolean) => void;
 };
 
 type ActiveRequest = {
@@ -28,6 +30,7 @@ export const useProductRecommendationStore =
     products: [],
     status: "idle",
     error: null,
+    hasRecommendationResult: false,
 
     loadProducts: (category = "ALL") => {
       activeRequest?.controller.abort();
@@ -37,7 +40,7 @@ export const useProductRecommendationStore =
         controller: new AbortController(),
       };
       activeRequest = request;
-      set({ status: "loading", error: null });
+      set({ status: "loading", error: null, hasRecommendationResult: false });
 
       void (async () => {
         try {
@@ -59,6 +62,7 @@ export const useProductRecommendationStore =
               category: product.category,
               price: product.price,
               imageUrl: product.primaryImageUrl ?? undefined,
+              favorited: product.favorited,
             }),
           );
 
@@ -107,13 +111,19 @@ export const useProductRecommendationStore =
       activeRequest?.controller.abort();
       const request = { id: ++requestSequence, controller: new AbortController() };
       activeRequest = request;
-      set({ status: "loading", error: null, products: [] });
+      set({
+        status: "loading",
+        error: null,
+        products: [],
+        hasRecommendationResult: false,
+      });
 
       void backendApi.catalog.createRecommendation(
         {
           occasion: criteria.occasion as Exclude<typeof criteria.occasion, "">,
           season: criteria.season as Exclude<typeof criteria.season, "">,
           preferredFeatures: criteria.preferredFeatures as [typeof criteria.preferredFeatures[number], ...typeof criteria.preferredFeatures],
+          category: criteria.category === "ALL" ? undefined : criteria.category,
         },
         request.controller.signal,
       ).then((response) => {
@@ -130,10 +140,13 @@ export const useProductRecommendationStore =
           recommendationScore: product.score,
           recommendationScoreBreakdown: product.scoreBreakdown,
           recommendationReason: product.reason,
+          favorited: product.favorited,
         }));
-        set({ products, status: "success", error: null });
+        set({ products, status: "success", error: null, hasRecommendationResult: true });
       }).catch(() => {
-        if (!request.controller.signal.aborted && activeRequest?.id === request.id) set({ status: "error", error: "추천 제품을 불러오지 못했습니다." });
+        if (!request.controller.signal.aborted && activeRequest?.id === request.id) {
+          set({ status: "error", error: "추천 제품을 불러오지 못했습니다.", hasRecommendationResult: false });
+        }
       }).finally(() => { if (activeRequest?.id === request.id) activeRequest = null; });
 
       return () => {
@@ -142,5 +155,13 @@ export const useProductRecommendationStore =
           activeRequest = null;
         }
       };
+    },
+
+    setProductFavorited: (productId, favorited) => {
+      set((state) => ({
+        products: state.products.map((product) =>
+          product.id === productId ? { ...product, favorited } : product,
+        ),
+      }));
     },
   }));

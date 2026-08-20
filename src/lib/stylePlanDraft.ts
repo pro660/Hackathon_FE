@@ -7,6 +7,37 @@ import type {
 export const personalizeTagsStorageKey = "personalize:selected-tags";
 export const stylePlanContextStorageKey = "personalize:style-plan-context";
 export const stylePlanIdempotencyStorageKey = "personalize:style-plan-idempotency";
+export const stylePlanPreviewStorageKey = "personalize:style-plan-preview";
+
+export type StylePlanPreviewItem = {
+  myItemId: string;
+  name: string;
+  imageUrl: string | null;
+  role: string;
+  sortOrder: number;
+};
+
+export type StylePlanPreviewProduct = {
+  productId: string;
+  name: string;
+  imageUrl: string | null;
+  rank: number;
+  reason: string;
+};
+
+export type StylePlanPreview = {
+  title: string;
+  description: string | null;
+  ownedItems: StylePlanPreviewItem[];
+  recommendedProducts: StylePlanPreviewProduct[];
+  generationType: "AI" | "RULE_BASED";
+};
+
+export type PreparedStylePlanPreview = {
+  context: StylePlanSliderContext;
+  jobId: string;
+  preview: StylePlanPreview;
+};
 
 export const smartMoodOptions = [
   { value: "MINIMAL", label: "미니멀" },
@@ -156,4 +187,74 @@ export function readStylePlanSliderContext(): StylePlanSliderContext | null {
   } catch {
     return null;
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+export function parseStylePlanPreview(
+  value: unknown,
+): StylePlanPreview | null {
+  if (
+    !isRecord(value) ||
+    typeof value.title !== "string" ||
+    !Array.isArray(value.ownedItems) ||
+    !Array.isArray(value.recommendedProducts)
+  ) {
+    return null;
+  }
+
+  return value as StylePlanPreview;
+}
+
+export function getStylePlanIdempotencyKey() {
+  const current = window.sessionStorage.getItem(
+    stylePlanIdempotencyStorageKey,
+  );
+  if (current) return current;
+
+  const key = window.crypto.randomUUID();
+  window.sessionStorage.setItem(stylePlanIdempotencyStorageKey, key);
+  return key;
+}
+
+export function writePreparedStylePlanPreview(
+  prepared: PreparedStylePlanPreview,
+) {
+  window.sessionStorage.setItem(
+    stylePlanPreviewStorageKey,
+    JSON.stringify(prepared),
+  );
+}
+
+export function readPreparedStylePlanPreview(): PreparedStylePlanPreview | null {
+  const serialized = window.sessionStorage.getItem(stylePlanPreviewStorageKey);
+  if (!serialized) return null;
+
+  try {
+    const value = JSON.parse(serialized) as unknown;
+    if (
+      !isRecord(value) ||
+      typeof value.jobId !== "string" ||
+      !isRecord(value.context)
+    ) {
+      return null;
+    }
+
+    const preview = parseStylePlanPreview(value.preview);
+    if (!preview) return null;
+
+    return {
+      context: value.context as StylePlanSliderContext,
+      jobId: value.jobId,
+      preview,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function clearPreparedStylePlanPreview() {
+  window.sessionStorage.removeItem(stylePlanPreviewStorageKey);
 }

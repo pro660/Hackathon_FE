@@ -1,21 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { ConfirmDialog } from "@/components/common/feedback/ConfirmDialog";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
 import { getApiErrorMessage } from "@/lib/apiError";
-import { readStylePlanSliderContext, stylePlanIdempotencyStorageKey } from "@/lib/stylePlanDraft";
+import {
+  clearPreparedStylePlanPreview,
+  getStylePlanIdempotencyKey,
+  parseStylePlanPreview,
+  readPreparedStylePlanPreview,
+  readStylePlanSliderContext,
+  stylePlanIdempotencyStorageKey,
+  type StylePlanPreview,
+} from "@/lib/stylePlanDraft";
 import { backendApi } from "@/services/api";
 import { requestStylePlanPreview } from "@/services/stylePlanWorkflow";
 import type { StylePlanSliderContext } from "@/types/api";
-
-type PreviewItem = { myItemId: string; name: string; imageUrl: string | null; role: string; sortOrder: number };
-type PreviewProduct = { productId: string; name: string; imageUrl: string | null; rank: number; reason: string };
-type StylePlanPreview = { title: string; description: string | null; ownedItems: PreviewItem[]; recommendedProducts: PreviewProduct[]; generationType: "AI" | "RULE_BASED" };
 
 const roleLabels: Record<string, string> = {
   MAIN: "메인",
@@ -62,21 +66,9 @@ function ResultItemCard({
   );
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null; }
-function parsePreview(value: unknown): StylePlanPreview | null {
-  if (!isRecord(value) || typeof value.title !== "string" || !Array.isArray(value.ownedItems) || !Array.isArray(value.recommendedProducts)) return null;
-  return value as StylePlanPreview;
-}
-function getIdempotencyKey() {
-  const current = sessionStorage.getItem(stylePlanIdempotencyStorageKey);
-  if (current) return current;
-  const key = crypto.randomUUID();
-  sessionStorage.setItem(stylePlanIdempotencyStorageKey, key);
-  return key;
-}
-
 export default function AiRecommendPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [context, setContext] = useState<StylePlanSliderContext | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [preview, setPreview] = useState<StylePlanPreview | null>(null);
@@ -87,6 +79,24 @@ export default function AiRecommendPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const prepared = readPreparedStylePlanPreview();
+
+    if (prepared) {
+      void Promise.resolve().then(() => {
+        if (controller.signal.aborted) return;
+        setContext(prepared.context);
+        setJobId(prepared.jobId);
+        setPreview(prepared.preview);
+        setStatus("");
+      });
+      return () => controller.abort();
+    }
+
+    if (pathname === "/smart-recommendations/result") {
+      router.replace("/smart-recommendations/loading");
+      return () => controller.abort();
+    }
+
     const nextContext = readStylePlanSliderContext();
     if (!nextContext) {
       void Promise.resolve().then(() => {
@@ -97,9 +107,9 @@ export default function AiRecommendPage() {
       });
       return () => controller.abort();
     }
-    void requestStylePlanPreview(nextContext, getIdempotencyKey(), controller.signal)
+    void requestStylePlanPreview(nextContext, getStylePlanIdempotencyKey(), controller.signal)
       .then((job) => {
-        const result = parsePreview(job.result ?? job.fallback);
+        const result = parseStylePlanPreview(job.result ?? job.fallback);
         if (!result) throw new Error(job.error?.message ?? "추천 결과 형식이 올바르지 않습니다.");
         setContext(nextContext);
         setJobId(job.jobId);
@@ -109,7 +119,7 @@ export default function AiRecommendPage() {
       .catch((failure) => { if (!controller.signal.aborted) { setStatus(""); setError(getApiErrorMessage(failure, "스타일 추천을 불러오지 못했습니다.")); } })
       .finally(() => sessionStorage.removeItem(stylePlanIdempotencyStorageKey));
     return () => controller.abort();
-  }, []);
+  }, [pathname, router]);
 
   const saveStylePlan = async () => {
     if (!preview || !context || !jobId) return;
@@ -123,6 +133,7 @@ export default function AiRecommendPage() {
         ownedItems: preview.ownedItems.filter((item) => Number.isFinite(Number(item.myItemId)) && roles.has(item.role)).map((item) => ({ myItemId: Number(item.myItemId), role: item.role as "MAIN" | "TOP" | "BOTTOM" | "SHOES" | "BAG" | "ACCESSORY", sortOrder: item.sortOrder })),
         recommendedProducts: preview.recommendedProducts.filter((item) => Number.isFinite(Number(item.productId))).map((item) => ({ productId: Number(item.productId), rank: item.rank, reason: item.reason })),
       });
+      clearPreparedStylePlanPreview();
       router.replace(`/place?stylePlanId=${encodeURIComponent(response.data.data.stylePlanId)}`);
     } catch (failure) {
       setError(getApiErrorMessage(failure, "스타일 플랜을 저장하지 못했습니다."));

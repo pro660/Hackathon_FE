@@ -6,6 +6,7 @@ type MobileScreenLayoutProps = {
   animateContent?: boolean;
   children: ReactNode;
   bottomNavigation?: ReactNode;
+  overlay?: ReactNode;
   contentClassName?: string;
   frameClassName?: string;
   figmaNodeId?: string;
@@ -15,6 +16,7 @@ export function MobileScreenLayout({
   animateContent = true,
   children,
   bottomNavigation,
+  overlay,
   contentClassName = "",
   frameClassName = "",
   figmaNodeId,
@@ -31,6 +33,7 @@ export function MobileScreenLayout({
           {animateContent ? <PageTransition>{children}</PageTransition> : children}
         </div>
 
+        {overlay}
         {bottomNavigation}
       </div>
     </main>
