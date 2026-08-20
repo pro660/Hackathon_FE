@@ -12,6 +12,12 @@ const hiddenKeys = new Set([
   "updatedAt",
 ]);
 
+const technicalValues = new Set([
+  "USER_CONFIRMED",
+  "AI_ESTIMATED",
+  "PRODUCT_DATA",
+]);
+
 const labelMap: Record<string, string> = {
   nextRecommendedCare: "다음 권장 관리",
   nextCareDate: "다음 권장일",
@@ -42,7 +48,9 @@ function humanizeKey(key: string) {
 }
 
 function stringifyValue(value: unknown): string | null {
-  if (typeof value === "string") return value;
+  if (typeof value === "string") {
+    return technicalValues.has(value) ? null : value;
+  }
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   if (Array.isArray(value)) {
     const values = value
@@ -51,8 +59,9 @@ function stringifyValue(value: unknown): string | null {
     return values.length ? values.join("\n") : null;
   }
   if (value && typeof value === "object") {
-    const values = Object.values(value)
-      .map((entry) => stringifyValue(entry))
+    const values = Object.entries(value)
+      .filter(([key]) => !hiddenKeys.has(key))
+      .map(([, entry]) => stringifyValue(entry))
       .filter((entry): entry is string => Boolean(entry));
     return values.length ? values.join("\n") : null;
   }

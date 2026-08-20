@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { getGuideEntries } from "@/components/care/carePresentation";
+import { ConfirmDialog } from "@/components/common/feedback/ConfirmDialog";
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
@@ -54,22 +55,26 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
   const [calendar, setCalendar] = useState<CareCalendar | null>(null);
   const [reminder, setReminder] = useState<CareReminderSetting | null>(null);
   const [isUpdatingReminder, setIsUpdatingReminder] = useState(false);
+  const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!itemId) return;
     const controller = new AbortController();
-    void Promise.all([
-      backendApi.closet.getCareCalendar(itemId, month, controller.signal),
-      backendApi.closet.getCareReminderSetting(itemId, controller.signal),
-    ])
-      .then(([calendarResponse, reminderResponse]) => {
+    void backendApi.closet
+      .getCareCalendar(itemId, month, controller.signal)
+      .then((calendarResponse) => {
         setCalendar(calendarResponse.data.data);
-        setReminder(reminderResponse.data.data);
       })
       .catch(() => {
         if (!controller.signal.aborted) setError("관리 캘린더를 불러오지 못했습니다.");
       });
+
+    void backendApi.closet
+      .getCareReminderSetting(itemId, controller.signal)
+      .then((reminderResponse) => setReminder(reminderResponse.data.data))
+      .catch(() => undefined);
+
     return () => controller.abort();
   }, [itemId, month]);
 
@@ -89,8 +94,10 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
     try {
       const response = await backendApi.closet.updateCareReminderSetting(itemId, !reminder.enabled);
       setReminder(response.data.data);
+      setIsReminderDialogOpen(false);
     } catch {
       setError("관리 알림 설정을 변경하지 못했습니다.");
+      setIsReminderDialogOpen(false);
     } finally {
       setIsUpdatingReminder(false);
     }
@@ -149,7 +156,7 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
 
             {itemId && reminder ? (
               <LuxuryReveal className="mt-auto pt-8" delay={160}>
-                <button type="button" disabled={isUpdatingReminder || calendar.available === false} onClick={() => void toggleReminder()} className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#17171c] text-[14px] font-bold text-white disabled:opacity-45">
+                <button type="button" disabled={isUpdatingReminder || calendar.available === false} onClick={() => setIsReminderDialogOpen(true)} className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-[#17171c] text-[14px] font-bold text-white disabled:opacity-45">
                   {isUpdatingReminder ? "알림 설정 중..." : reminder.enabled ? "관리 알림 끄기" : "관리 알림 설정"}
                 </button>
               </LuxuryReveal>
@@ -157,6 +164,25 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
           </>
         ) : null}
       </div>
+
+      {reminder ? (
+        <ConfirmDialog
+          open={isReminderDialogOpen}
+          title={reminder.enabled ? "관리 알림을 끌까요?" : "관리 알림을 켤까요?"}
+          description={
+            reminder.enabled
+              ? "앞으로 예정된 관리 일정의 서비스 알림을 받지 않아요."
+              : "지금 이후의 관리 일정부터 서비스 알림을 받아요. 지난 일정의 알림은 새로 생성되지 않아요."
+          }
+          confirmLabel={reminder.enabled ? "알림 끄기" : "알림 켜기"}
+          isPending={isUpdatingReminder}
+          pendingLabel="설정 중..."
+          onConfirm={() => void toggleReminder()}
+          onCancel={() => {
+            if (!isUpdatingReminder) setIsReminderDialogOpen(false);
+          }}
+        />
+      ) : null}
     </MobileScreenLayout>
   );
 }

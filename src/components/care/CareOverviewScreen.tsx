@@ -46,9 +46,13 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
 
   const entries = guide ? getGuideEntries(guide) : [];
   const primaryEntry =
+    entries.find((entry) => !/summary|core|keyPoint|highlight/i.test(entry.key) && /천|먼지|닦|세척|건조|제거|관리|환기|습기/.test(entry.value)) ??
     entries.find((entry) => /nextRecommendedCare|recommendation|instructions|careGuide|guide/i.test(entry.key)) ??
     entries.find((entry) => !/summary|core|keyPoint|highlight/i.test(entry.key) && !/\d{4}[-.]\d{2}[-.]\d{2}/.test(entry.value));
   const coreEntry = entries.find((entry) => /summary|core|keyPoint|highlight/i.test(entry.key));
+  const primaryText = primaryEntry?.value
+    .split("\n")
+    .find((line) => /천|먼지|닦|세척|건조|제거|관리|환기|습기/.test(line)) ?? primaryEntry?.value;
   const nextDate = findDateText(entries);
   const canUseGuide = Boolean(
     guide &&
@@ -102,7 +106,7 @@ export function CareOverviewScreen({ itemId }: CareOverviewScreenProps) {
               <section className="min-h-[142px] rounded-[18px] bg-[#f3eee6] px-[18px] py-[22px]">
                 <p className="text-[11px] font-bold text-[#777780]">다음 권장 관리</p>
                 <p className="mt-4 whitespace-pre-line text-[18px] leading-6 font-bold text-[#24242a]">
-                  {primaryEntry?.value ?? "제품의 관리 안내를 확인해 주세요."}
+                  {primaryText ?? "제품의 관리 안내를 확인해 주세요."}
                 </p>
               </section>
             </LuxuryReveal>
