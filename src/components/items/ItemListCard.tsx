@@ -37,10 +37,10 @@ export function ItemListCard({
         style={imageStyle}
       />
       <span className="ml-4 min-w-0 flex-1">
-        <span className="block truncate text-[14px] leading-[17px] font-bold text-[#15151a]">
+        <span className="block truncate text-[14px] leading-[17px] font-bold text-[#0e0e12]">
           {title}
         </span>
-        <span className="mt-1 block truncate text-[11px] leading-[14px] text-[#85858f]">
+        <span className="mt-1 block truncate text-[11px] leading-[14px] text-[#6e707a]">
           {subtitle}
         </span>
       </span>

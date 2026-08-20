@@ -11,19 +11,72 @@ import { useItemRegistrationStore } from "@/store/useItemRegistrationStore";
 import { useMenuDataStore } from "@/store/useMenuDataStore";
 
 const categoryFilters = [
-  "전체",
-  "가방",
-  "가죽 소품",
-  "패션 액세서리",
-  "의류",
-  "신발",
+  { value: "전체", label: "카테고리" },
+  { value: "가방", label: "가방" },
+  { value: "가죽 소품", label: "가죽 소품" },
+  { value: "패션 액세서리", label: "패션 액세서리" },
+  { value: "의류", label: "의류" },
+  { value: "신발", label: "신발" },
 ] as const;
 
-type CategoryFilter = (typeof categoryFilters)[number];
+const colorFilters = [
+  { value: "전체", label: "색상" },
+  { value: "BLACK", label: "블랙" },
+  { value: "WHITE", label: "화이트" },
+  { value: "GRAY", label: "그레이" },
+  { value: "BROWN", label: "브라운" },
+  { value: "BEIGE", label: "베이지" },
+  { value: "RED", label: "레드" },
+  { value: "ORANGE", label: "오렌지" },
+  { value: "YELLOW", label: "옐로우" },
+  { value: "GREEN", label: "그린" },
+  { value: "BLUE", label: "블루" },
+  { value: "PURPLE", label: "퍼플" },
+  { value: "PINK", label: "핑크" },
+  { value: "METALLIC", label: "메탈릭" },
+  { value: "MULTI", label: "멀티" },
+  { value: "OTHER", label: "기타" },
+] as const;
+
+const colorLabels = Object.fromEntries(
+  colorFilters.slice(1).map(({ value, label }) => [value, label]),
+) as Record<string, string>;
+
+const materialLabels: Record<string, string> = {
+  LEATHER: "가죽",
+  SYNTHETIC_LEATHER: "인조 가죽",
+  CANVAS: "캔버스",
+  FABRIC: "패브릭",
+  NYLON: "나일론",
+  METAL: "메탈",
+  OTHER: "기타 소재",
+  UNKNOWN: "",
+};
+
+type CategoryFilter = (typeof categoryFilters)[number]["value"];
+type ColorFilter = (typeof colorFilters)[number]["value"];
+
+function getItemSubtitle(
+  brandName: string | null,
+  category: string,
+  color: string,
+  material: string,
+) {
+  return [
+    brandName || "브랜드 미입력",
+    category,
+    colorLabels[color] ?? (color === "미입력" ? "" : color),
+    materialLabels[material] ?? (material === "미입력" ? "" : material),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 export function ItemsScreen() {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("전체");
+  const [selectedColor, setSelectedColor] = useState<ColorFilter>("전체");
+  const [searchQuery, setSearchQuery] = useState("");
   const [hasLoaded, setHasLoaded] = useState(false);
   const items = useMenuDataStore((state) => state.items);
   const isLoading = useMenuDataStore((state) => state.isLoading);
@@ -42,18 +95,32 @@ export function ItemsScreen() {
   }, [loadItems, loadPendingImageUpload]);
 
   const filteredItems = useMemo(
-    () =>
-      selectedCategory === "전체"
-        ? items
-        : items.filter((item) => item.category === selectedCategory),
-    [items, selectedCategory],
+    () => {
+      const normalizedQuery = searchQuery.trim().toLocaleLowerCase("ko-KR");
+
+      return items.filter((item) => {
+        const matchesSearch =
+          !normalizedQuery ||
+          item.name.toLocaleLowerCase("ko-KR").includes(normalizedQuery) ||
+          item.brandName
+            ?.toLocaleLowerCase("ko-KR")
+            .includes(normalizedQuery);
+        const matchesCategory =
+          selectedCategory === "전체" || item.category === selectedCategory;
+        const matchesColor =
+          selectedColor === "전체" || item.color === selectedColor;
+
+        return Boolean(matchesSearch && matchesCategory && matchesColor);
+      });
+    },
+    [items, searchQuery, selectedCategory, selectedColor],
   );
 
   const isInitialLoading = !hasLoaded || (isLoading && items.length === 0);
 
   return (
     <MobileScreenLayout
-      figmaNodeId="390:301"
+      figmaNodeId="119:909"
       contentClassName="bg-white px-6 pt-6 pb-2 text-[#15151a]"
       bottomNavigation={<BottomNavigation activeItem="items" />}
     >
@@ -63,38 +130,55 @@ export function ItemsScreen() {
             내 아이템
           </h1>
           <p className="mt-8 text-[13px] leading-4 text-[#85858f]">
-            등록한 제품을 선택해 자세히 확인해요
+            이름·브랜드로 검색하고 조건별로 찾아보세요
           </p>
         </LuxuryReveal>
 
         <LuxuryReveal delay={60}>
           <div
-            aria-label="내 아이템 카테고리"
-            className="-mx-6 mt-8 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="내 아이템 검색 및 필터"
+            className="mt-[34px] flex items-center gap-1.5"
           >
-            {categoryFilters.map((category) => {
-              const isSelected = category === selectedCategory;
-
-              return (
-                <button
-                  key={category}
-                  type="button"
-                  aria-pressed={isSelected}
-                  className={`h-[38px] shrink-0 rounded-full border px-5 text-[12px] font-bold transition-colors ${
-                    isSelected
-                      ? "border-[#15151a] bg-[#15151a] text-white"
-                      : "border-[#d1d1d8] bg-white text-[#55555d] hover:border-[#a8a8af]"
-                  }`}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
-              );
-            })}
+            <input
+              type="search"
+              value={searchQuery}
+              aria-label="이름·브랜드 검색"
+              placeholder="이름·브랜드 검색"
+              className="h-8 w-40 min-w-0 rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-3 text-center text-[10px] text-[#4b4741] outline-none transition-colors placeholder:text-[#4b4741] focus:border-[#8b7355]"
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+            <select
+              aria-label="카테고리"
+              value={selectedCategory}
+              className="h-8 w-20 appearance-none rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-2 text-center text-[10px] text-[#4b4741] outline-none transition-colors focus:border-[#8b7355]"
+              onChange={(event) =>
+                setSelectedCategory(event.target.value as CategoryFilter)
+              }
+            >
+              {categoryFilters.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="색상"
+              value={selectedColor}
+              className="h-8 w-[66px] appearance-none rounded-2xl border border-[#ded9d1] bg-[#f4f1ec] px-2 text-center text-[10px] text-[#4b4741] outline-none transition-colors focus:border-[#8b7355]"
+              onChange={(event) =>
+                setSelectedColor(event.target.value as ColorFilter)
+              }
+            >
+              {colorFilters.map((color) => (
+                <option key={color.value} value={color.value}>
+                  {color.label}
+                </option>
+              ))}
+            </select>
           </div>
         </LuxuryReveal>
 
-        <section className="mt-6" aria-live="polite">
+        <section className="mt-[34px]" aria-live="polite">
         {pendingImageUpload ? (
           <LuxuryReveal delay={90}>
             <Link
@@ -149,9 +233,11 @@ export function ItemsScreen() {
           </div>
         ) : filteredItems.length === 0 ? (
           <p className="rounded-[15px] border border-[#dedee2] bg-[#f6f6f8] px-5 py-10 text-center text-[13px] text-[#777780]">
-            {selectedCategory === "전체"
+            {selectedCategory === "전체" &&
+            selectedColor === "전체" &&
+            !searchQuery.trim()
               ? "등록한 아이템이 없습니다."
-              : "이 카테고리에 등록한 아이템이 없습니다."}
+              : "검색 조건에 맞는 아이템이 없습니다."}
           </p>
         ) : (
           <ul
@@ -163,7 +249,12 @@ export function ItemsScreen() {
                 <LuxuryReveal delay={120 + index * 45}>
                   <ItemListCard
                     title={item.name}
-                    subtitle={`${item.brandName || "브랜드 미입력"} · ${item.category}`}
+                    subtitle={getItemSubtitle(
+                      item.brandName,
+                      item.category,
+                      item.color,
+                      item.material,
+                    )}
                     imageAlt={`${item.name} 아이템 이미지`}
                     imageUrl={item.imageUrl}
                     fallbackColor={item.colorHex}
