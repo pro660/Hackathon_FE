@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { PiHeart, PiHeartFill } from "react-icons/pi";
 
 import {
@@ -133,6 +134,7 @@ export function ProductCatalogScreen() {
       contentClassName="bg-white px-6 pt-6 pb-8"
       bottomNavigation={<BottomNavigation activeItem="recommendation" />}
       overlay={<StatusToast toast={toast} onDismiss={dismissToast} />}
+      scrollKey={`${category}-${color}-${price}-${sort}-${page}`}
     >
       <LuxuryReveal>
         <h1 className="text-[17px] leading-6 font-bold text-[#0e0e12]">
@@ -143,7 +145,7 @@ export function ProductCatalogScreen() {
         </p>
       </LuxuryReveal>
 
-      <LuxuryReveal className="mt-5" delay={50}>
+      <LuxuryReveal className="relative z-40 mt-5" delay={50}>
         <div className="grid grid-cols-[78px_64px_70px_1fr] gap-1.5">
           <FilterMenu
             label="카테고리"
@@ -217,7 +219,7 @@ export function ProductCatalogScreen() {
         </div>
       </LuxuryReveal>
 
-      <section className="mt-[34px]" aria-live="polite">
+      <section className="relative z-0 mt-[34px]" aria-live="polite">
         {status === "loading" && products.length === 0 ? (
           <ProductRowsSkeleton />
         ) : null}
@@ -287,7 +289,7 @@ export function ProductCatalogScreen() {
         </ul>
 
         {status === "success" && totalPages > 1 ? (
-          <div className="mt-6 flex items-center justify-center gap-4">
+          <div className="mt-8 mb-10 flex items-center justify-center gap-4">
             <button
               type="button"
               disabled={page === 0}
@@ -354,32 +356,41 @@ function FilterMenu({
         <span className="truncate">{selectedLabel}</span>
       </button>
 
-      {open ? (
-        <div
-          role="menu"
-          aria-label={`${label} 선택`}
-          className={`absolute top-10 z-30 max-h-64 min-w-[148px] overflow-y-auto rounded-[15px] border border-[#ded9d1] bg-white p-1.5 shadow-[0_14px_34px_rgba(21,21,26,0.16)] ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-        >
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              role="menuitemradio"
-              aria-checked={value === option.value}
-              onClick={() => onChange(option.value)}
-              className={`flex h-9 w-full items-center rounded-[10px] px-3 text-left text-[12px] ${
-                value === option.value
-                  ? "bg-[#f0ece5] font-bold text-[#15151a]"
-                  : "text-[#5f5c57] hover:bg-[#f7f5f1]"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            role="menu"
+            aria-label={`${label} 선택`}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -5, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute top-10 z-50 max-h-64 min-w-[148px] overflow-y-auto rounded-[15px] border border-[#ded9d1] bg-white p-1.5 shadow-[0_16px_38px_rgba(21,21,26,0.2)] ${
+              align === "right" ? "right-0" : "left-0"
+            }`}
+          >
+            {options.map((option, index) => (
+              <motion.button
+                key={option.value}
+                type="button"
+                role="menuitemradio"
+                aria-checked={value === option.value}
+                onClick={() => onChange(option.value)}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, delay: Math.min(index * 0.025, 0.15) }}
+                className={`flex h-9 w-full items-center rounded-[10px] px-3 text-left text-[12px] ${
+                  value === option.value
+                    ? "bg-[#f0ece5] font-bold text-[#15151a]"
+                    : "text-[#5f5c57] hover:bg-[#f7f5f1]"
+                }`}
+              >
+                {option.label}
+              </motion.button>
+            ))}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
