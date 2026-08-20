@@ -59,19 +59,46 @@ function ConditionSlider({
         <p>{rightLabel}</p>
       </div>
       <div className="mt-[13px]">
-        <input
-          type="range"
-          min={1}
-          max={10}
-          step={1}
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
-          aria-valuemin={1}
-          aria-valuemax={10}
-          aria-valuenow={value}
-          style={{ "--condition-fill": "0%" } as CSSProperties}
-          className="condition-range w-full"
-        />
+        <div className="relative h-[22px]">
+          <div
+            aria-hidden="true"
+            className="condition-range-track absolute top-1/2 right-[11px] left-[11px] h-1 -translate-y-1/2 overflow-hidden rounded-full bg-[#d1d3da]"
+          >
+            <span
+              className="condition-range-fill block h-full rounded-full bg-[#17181d]"
+              style={
+                {
+                  "--condition-fill": `${((value - 1) / 9) * 100}%`,
+                } as CSSProperties
+              }
+            />
+          </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 right-[11px] bottom-0 left-[11px]"
+          >
+            <span
+              className="condition-range-thumb absolute top-1/2 h-[22px] w-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#17181d]"
+              style={
+                {
+                  "--condition-fill": `${((value - 1) / 9) * 100}%`,
+                } as CSSProperties
+              }
+            />
+          </span>
+          <input
+            type="range"
+            min={1}
+            max={10}
+            step={1}
+            value={value}
+            onChange={(event) => onChange(Number(event.target.value))}
+            aria-valuemin={1}
+            aria-valuemax={10}
+            aria-valuenow={value}
+            className="condition-range absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+          />
+        </div>
       </div>
     </div>
   );
@@ -126,7 +153,7 @@ export default function ConditionPage() {
   return (
     <MobileScreenLayout
       figmaNodeId="158:597"
-      contentClassName="bg-white px-6 pt-6 pb-[88px] text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-6 pb-12 text-[#0e0e12]"
     >
       <div className="flex min-h-full flex-col">
       <LuxuryReveal>

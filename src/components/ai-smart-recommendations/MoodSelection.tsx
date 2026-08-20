@@ -55,7 +55,7 @@ export function MoodSelection() {
   return (
     <MobileScreenLayout
       figmaNodeId="154:2"
-      contentClassName="bg-white px-6 pt-[63px] pb-[88px] text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-[63px] pb-10 text-[#0e0e12]"
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
