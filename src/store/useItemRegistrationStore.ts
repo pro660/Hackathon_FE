@@ -24,6 +24,7 @@ export type ItemRegistrationDraft = {
   material: MaterialGroup | "";
   purchaseDate: string;
   purchasePrice: string;
+  purchasePlace: string;
   memo: string;
 };
 
@@ -81,6 +82,7 @@ const emptyDraft: ItemRegistrationDraft = {
   material: "",
   purchaseDate: "",
   purchasePrice: "",
+  purchasePlace: "",
   memo: "",
 };
 
