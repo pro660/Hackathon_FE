@@ -226,7 +226,7 @@ export default function AiRecommendPage() {
                     key={`${product.productId}-${product.rank}`}
                     imageUrl={product.imageUrl}
                     title={product.name}
-                    description={`선정 이유 · ${product.reason}`}
+                    description={product.reason}
                     badge={`${product.rank}순위`}
                   />
                 ))}
@@ -241,7 +241,7 @@ export default function AiRecommendPage() {
         </div>
       ) : null}
 
-      <LuxuryReveal className="mt-6" delay={210}>
+      <LuxuryReveal className="mt-6 mb-6" delay={210}>
         <button
           type="button"
           disabled={!preview || isSaving}

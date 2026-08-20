@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { MobileScreenLayout } from "@/components/common/layout/MobileScreenLayout";
 import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
+import { BackButton } from "@/components/common/navigation/BackButton";
 import {
   createMoodConditionDefaults,
   createStylePlanSliderContext,
@@ -157,7 +158,8 @@ export default function ConditionPage() {
     >
       <div className="flex min-h-full flex-col">
       <LuxuryReveal>
-        <p className="text-[17px] leading-5 font-bold">
+        <BackButton />
+        <p className="mt-1 text-[17px] leading-5 font-bold">
           스타일 조건 설정
         </p>
         <h1 className="mt-9 text-[27px] leading-8 font-bold tracking-[-0.04em]">
