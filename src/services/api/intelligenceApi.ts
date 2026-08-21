@@ -92,9 +92,9 @@ type PlaceSearchQuery = {
 
 export const aiJobPollingPolicy = {
   initialIntervalMs: 2_000,
-  maximumIntervalMs: 2_000,
-  backoffMultiplier: 1,
-  timeoutMs: 30_000,
+  maximumIntervalMs: 5_000,
+  backoffMultiplier: 1.5,
+  timeoutMs: 90_000,
 } as const;
 
 function validateStylePlanRequest(body: AiJobRequest) {
