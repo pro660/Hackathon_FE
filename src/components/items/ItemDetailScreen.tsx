@@ -36,10 +36,8 @@ export function ItemDetailScreen({ itemId }: ItemDetailScreenProps) {
     return (
       <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-8">
         <div className="flex min-h-full flex-col">
-          <div className="flex items-center gap-2">
-            <BackButton variant="plain" />
-            <div className="h-5 w-36 animate-pulse rounded bg-[#e9e5df]" />
-          </div>
+          <BackButton variant="plain" />
+          <div className="mt-1 h-5 w-36 animate-pulse rounded bg-[#e9e5df]" />
           <div className="mt-4 h-4 w-40 animate-pulse rounded bg-[#efede9]" />
           <div className="mt-8 h-[260px] animate-pulse rounded-[18px] bg-[#e9e5df]" />
           <div className="mt-auto space-y-4 pt-8">
@@ -92,12 +90,10 @@ export function ItemDetailScreen({ itemId }: ItemDetailScreenProps) {
     >
       <div className="flex min-h-full flex-col">
         <LuxuryReveal>
-          <div className="flex items-center gap-2">
-            <BackButton variant="plain" />
-            <h1 className="min-w-0 truncate text-[17px] leading-5 font-bold tracking-[-0.02em]">
-              {item.name}
-            </h1>
-          </div>
+          <BackButton variant="plain" />
+          <h1 className="mt-1 min-w-0 truncate text-[17px] leading-5 font-bold tracking-[-0.02em]">
+            {item.name}
+          </h1>
           <p className="mt-4 text-[13px] leading-4 text-[#85858f]">
             {item.brandName || "브랜드 미입력"} · {formatRegisteredDate(item.createdAt)}
           </p>

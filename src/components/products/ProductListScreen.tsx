@@ -128,7 +128,7 @@ export function ProductListScreen() {
   return (
     <MobileScreenLayout
       figmaNodeId="157:511"
-      contentClassName="px-6 pt-[26px] pb-7"
+      contentClassName="px-6 pt-6 pb-7"
       bottomNavigation={<BottomNavigation activeItem="recommendation" />}
     >
       <LuxuryReveal>

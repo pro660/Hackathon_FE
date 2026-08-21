@@ -176,7 +176,7 @@ export function AccountDeletionScreen() {
         <BackButton />
       </LuxuryReveal>
 
-      <LuxuryReveal className="mt-5" delay={40}>
+      <LuxuryReveal className="mt-1" delay={40}>
         <ScreenHeader
           eyebrow="ACCOUNT"
           title="회원 탈퇴"

@@ -148,7 +148,7 @@ export default function AiRecommendPage() {
     >
       <LuxuryReveal>
         <BackButton />
-        <p className="mt-3 text-[11px] font-bold text-[#8b7355]">
+        <p className="mt-1 text-[11px] font-bold text-[#8b7355]">
           AI RECOMMEND
         </p>
         <h1 className="mt-2 text-[28px] leading-8 font-bold tracking-[-0.04em]">

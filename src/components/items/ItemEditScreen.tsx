@@ -243,7 +243,7 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
   return (
     <MobileScreenLayout
       figmaNodeId="119:986"
-      contentClassName="bg-white px-6 pt-6 pb-8 text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-4 pb-8 text-[#0e0e12]"
       bottomNavigation={<BottomNavigation activeItem="items" />}
     >
       <form className="flex min-h-full flex-col" onSubmit={handleSubmit}>

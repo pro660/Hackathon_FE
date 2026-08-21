@@ -87,9 +87,9 @@ export function PendingItemImageScreen() {
 
   if (!pendingImageUpload) {
     return (
-      <MobileScreenLayout contentClassName="bg-white px-6 pt-[47px] pb-8">
+      <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-8">
         <BackButton />
-        <div className="mt-6">
+        <div className="mt-1">
           <ScreenHeader
             eyebrow="IMAGE RETRY"
             title="보류된 사진이 없어요"
@@ -107,11 +107,11 @@ export function PendingItemImageScreen() {
   }
 
   return (
-    <MobileScreenLayout contentClassName="bg-white px-6 pt-[47px] pb-8">
+    <MobileScreenLayout contentClassName="bg-white px-6 pt-4 pb-8">
       <LuxuryReveal>
         <BackButton />
       </LuxuryReveal>
-      <LuxuryReveal className="mt-6" delay={40}>
+      <LuxuryReveal className="mt-1" delay={40}>
         <ScreenHeader
           eyebrow="IMAGE RETRY"
           title="사진만 다시 업로드"

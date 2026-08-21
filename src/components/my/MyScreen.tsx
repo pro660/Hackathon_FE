@@ -69,7 +69,7 @@ export function MyScreen() {
   return (
     <MobileScreenLayout
       figmaNodeId="390:246"
-      contentClassName="bg-white px-6 pt-[47px] pb-8 text-[#121217]"
+      contentClassName="bg-white px-6 pt-12 pb-8 text-[#121217]"
       bottomNavigation={<BottomNavigation activeItem="my" />}
     >
       <LuxuryReveal>

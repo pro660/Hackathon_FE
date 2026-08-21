@@ -71,7 +71,7 @@ export function AccountSettingsScreen() {
       <div className="flex min-h-full flex-col">
       <LuxuryReveal>
         <BackButton variant="plain" />
-        <h1 className="mt-2 text-[28px] leading-[34px] font-bold tracking-[-0.04em]">
+        <h1 className="mt-1 text-[28px] leading-[34px] font-bold tracking-[-0.04em]">
           계정 설정
         </h1>
       </LuxuryReveal>

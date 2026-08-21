@@ -24,7 +24,7 @@ export function MenuPageLayout({
 }: MenuPageLayoutProps) {
   return (
     <MobileScreenLayout
-      contentClassName="px-6 pt-[47px] pb-8"
+      contentClassName="px-6 pt-12 pb-8"
       bottomNavigation={<BottomNavigation activeItem={activeItem} />}
     >
       <ScreenHeader

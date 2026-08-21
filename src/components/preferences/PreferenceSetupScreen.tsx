@@ -134,7 +134,7 @@ export function PreferenceSetupScreen() {
         <BackButton />
       </LuxuryReveal>
 
-      <LuxuryReveal className="mt-5" delay={40}>
+      <LuxuryReveal className="mt-1" delay={40}>
         <ScreenHeader
           eyebrow="MY PREFERENCE"
           title="취향 분석"

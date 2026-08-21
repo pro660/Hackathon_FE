@@ -45,7 +45,7 @@ export function SavedPlacesScreen() {
         <BackButton />
       </LuxuryReveal>
 
-      <LuxuryReveal className="mt-5" delay={40}>
+      <LuxuryReveal className="mt-1" delay={40}>
         <ScreenHeader
           eyebrow="SAVED PLACES"
           title="저장한 장소"

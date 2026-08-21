@@ -202,7 +202,7 @@ export function AnalysisProgressScreen() {
   const hasFailed = resultStatus === "FAILED";
 
   return (
-    <MobileScreenLayout contentClassName="px-6 pt-[47px] pb-8">
+    <MobileScreenLayout contentClassName="px-6 pt-12 pb-8">
       <LuxuryReveal>
         <ScreenHeader
           eyebrow="AI ANALYSIS"

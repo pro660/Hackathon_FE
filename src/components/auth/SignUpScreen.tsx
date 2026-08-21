@@ -341,7 +341,7 @@ export function SignUpScreen() {
   };
 
   return (
-    <MobileScreenLayout contentClassName="bg-white px-6 pb-[32px] pt-[48px] text-[#17181d]">
+    <MobileScreenLayout contentClassName="bg-white px-6 pt-12 pb-[32px] text-[#17181d]">
       <section className="flex min-h-full flex-col">
         <div>
           <p className="text-[11px] font-bold tracking-[0.01em] text-[#8b7355]">

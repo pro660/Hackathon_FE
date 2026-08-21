@@ -62,10 +62,10 @@ export function PlaceDetailScreen({
 
   if (!place && isLoadingPlace) {
     return (
-      <MobileScreenLayout contentClassName="flex bg-white px-6 pt-[47px] pb-8">
+      <MobileScreenLayout contentClassName="flex bg-white px-6 pt-4 pb-8">
         <div className="flex min-h-full w-full flex-col">
           <BackButton />
-          <p className="mt-8 text-[13px] text-[#777780]">장소 정보를 불러오고 있어요.</p>
+          <p className="mt-1 text-[13px] text-[#777780]">장소 정보를 불러오고 있어요.</p>
         </div>
       </MobileScreenLayout>
     );
@@ -73,10 +73,10 @@ export function PlaceDetailScreen({
 
   if (!place) {
     return (
-      <MobileScreenLayout contentClassName="flex bg-white px-6 pt-[47px] pb-8">
+      <MobileScreenLayout contentClassName="flex bg-white px-6 pt-4 pb-8">
         <div className="flex min-h-full w-full flex-col">
           <BackButton />
-          <div className="mt-6">
+          <div className="mt-1">
             <ScreenHeader
               eyebrow="PLACE DETAIL"
               title={placeDetailError ?? "장소를 찾을 수 없어요"}
@@ -126,7 +126,7 @@ export function PlaceDetailScreen({
       <div className="flex min-h-full w-full flex-col">
         <LuxuryReveal>
           <BackButton />
-          <h1 className="text-[17px] leading-5 font-bold text-[#0e0e12]">
+          <h1 className="mt-1 text-[17px] leading-5 font-bold text-[#0e0e12]">
             {place.name}
           </h1>
         </LuxuryReveal>

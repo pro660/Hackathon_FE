@@ -157,7 +157,7 @@ export default function ConditionPage() {
   return (
     <MobileScreenLayout
       figmaNodeId="158:597"
-      contentClassName="bg-white px-6 pt-6 pb-12 text-[#0e0e12]"
+      contentClassName="bg-white px-6 pt-4 pb-12 text-[#0e0e12]"
     >
       <div className="flex min-h-full flex-col">
       <LuxuryReveal>

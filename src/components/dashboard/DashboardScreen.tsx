@@ -301,7 +301,7 @@ export function DashboardScreen() {
   return (
     <MobileScreenLayout
       figmaNodeId="147:240"
-      contentClassName="bg-white px-6 pt-[50px] pb-40"
+      contentClassName="bg-white px-6 pt-12 pb-40"
       bottomNavigation={<BottomNavigation activeItem="home" />}
     >
       <section className="text-[#15151a]">

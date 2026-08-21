@@ -64,7 +64,7 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
     <MobileScreenLayout figmaNodeId="1:441" contentClassName="pt-4 pb-9">
       <div className="px-6">
         <LuxuryReveal><BackButton /></LuxuryReveal>
-        <LuxuryReveal className="mt-3" delay={40}>
+        <LuxuryReveal className="mt-1" delay={40}>
           <ScreenHeader
             eyebrow={product?.brand ?? "PRODUCT"}
             title={product?.name ?? (error ? "제품을 찾을 수 없어요" : "제품 정보를 불러오는 중")}
