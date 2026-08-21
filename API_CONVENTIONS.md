@@ -1,6 +1,6 @@
 # API Conventions v0.4
 
-이 문서는 `입을래_API_명세서_v0.4_최종`과 Backend `main` 커밋 `7bdd532`에 맞춘 프론트 구현 규칙입니다.
+이 문서는 `입을래_API_명세서_v0.4_최종`, 이후 FE 변경 명세와 현재 프론트 구현을 기준으로 한 최종 연동 규칙입니다.
 
 충돌 시 우선순위:
 
@@ -43,10 +43,11 @@ Next.js가 `/api/:path*`를 `${BACKEND_API_ORIGIN}/api/:path*`로 전달합니�
 Axios 공통 설정:
 
 - `withCredentials: true`
-- 일반 요청 timeout 10초
+- 일반 요청 timeout 10초, AI Job 생성 timeout 20초
 - Bearer Access Token 요청 인터셉터
 - 401 발생 시 Refresh 단일 실행 후 원 요청 1회 재시도
 - 반복 Query는 `category=A&category=B` 형태로 직렬화
+- 화면 unmount·조건 변경 시 `AbortController`로 진행 중 조회와 Polling 취소
 
 JSON 요청의 `Content-Type`은 Axios가 설정합니다. `FormData` 업로드는 `Content-Type`을 직접 지정하지 않아 boundary가 자동 설정되게 합니다.
 
@@ -147,7 +148,10 @@ Response data:
 - Access Token: 응답 Body → Zustand 메모리 → `Authorization: Bearer`
 - Refresh Token: Backend `refresh_token` HttpOnly Cookie
 - Refresh Token을 JS에서 읽거나 localStorage에 저장하지 않음
+- localStorage에는 화면 표시용 사용자 정보만 `auth-user`로 저장하며 인가 판단에 사용하지 않음
 - Cookie가 필요한 요청은 credential 포함
+- 동시 401은 하나의 Refresh Promise를 공유하고 각 원 요청은 최대 한 번만 재시도
+- 로그인·회원가입·이메일 인증·OAuth 시작 요청의 401은 자동 Refresh 대상에서 제외
 
 ### OAuth
 
@@ -279,6 +283,17 @@ language: ko
 
 두 스타일 강도는 항상 함께 보내며 슬라이더 방식에서는 `styleTags`를 생략합니다. `styleTags: []`는 보내지 않습니다. `POST /ai-jobs`의 `Idempotency-Key`와 2초 간격·최대 30초 Polling 정책은 그대로 유지합니다.
 
+추천 조건 Request:
+
+```text
+occasion: DAILY | DATE | TRAVEL | GATHERING | CEREMONY | OUTDOOR | OTHER
+season: SPRING | SUMMER | AUTUMN | WINTER
+preferredFeatures: COMPACT | SPACIOUS | MULTIWAY 중 1개 이상
+category: 선택
+```
+
+저장된 `preferredStyleTags`는 Backend가 취향 프로필에서 가져오며 추천 요청마다 다시 보내지 않습니다.
+
 ## 제품·홈 응답 주의
 
 - 제품 목록에는 `inCart`가 없음
@@ -287,6 +302,7 @@ language: ko
 - Product tags 키는 `styles`, `seasons`, `occasions`, `features`
 - Home 제품 배열은 `recommendedProducts`, 점수는 `matchScore`
 - `GET /home`은 AI Job이나 Kakao 검색을 새로 실행하지 않음
+- 대시보드 MCM 제품 목록은 `GET /home`의 `recommendedProducts`를 사용
 
 ## 이미지·MyItem
 
@@ -306,6 +322,8 @@ POST /image-assets
 - 업로드 직후 TEMPORARY
 - UserItem ACTIVE 이미지 최대 1장
 - 이미지 또는 AI 실패 시 수동 등록 허용
+- 이미지 교체는 새 `imageAssetId` 업로드 후 연결하고, 기존 연결은 UserItem 이미지 DELETE로 제거
+- 아이템 생성 성공 후 이미지 연결 실패 시 아이템을 삭제하지 않고 재업로드 정보만 별도로 보존
 
 ## AI Job
 
@@ -319,8 +337,10 @@ PENDING → PROCESSING → SUCCEEDED
 - `FAILED` 조회도 HTTP 200일 수 있음
 - 생성 응답에 `cached` 필드 없음
 - Job error는 `code`, `message`만 사용
-- 현재 프론트 자동 Polling은 2초 간격·최대 30초
+- 현재 프론트 자동 Polling은 2초 간격·최대 30초이며 약 15회 조회
 - 이 시간은 Backend 고정 계약이 아니라 프론트 UX 정책
+- 화면 unmount 시 대기 Timer와 진행 중 GET 요청을 모두 취소
+- 네트워크 실패와 HTTP 200의 Job `FAILED`를 서로 다른 오류로 처리
 
 ITEM_ANALYSIS context:
 
@@ -342,13 +362,52 @@ PURCHASE_UTILITY context:
 
 구매 활용성 점수는 Backend Rule-Based이며 AI는 자연어 설명에만 사용될 수 있습니다. Job 결과가 `READY`일 때만 `analysisId`로 상세를 조회합니다. `INSUFFICIENT_DATA`는 정상 결과입니다.
 
+구매 활용성 점수 최대값:
+
+```text
+preferenceTagFitScore: 30
+styleCombinationScore: 25
+seasonUsabilityScore: 25
+ownedCategoryCombinationScore: 20
+utilityScore: 100
+```
+
+## 관리·알림
+
+- 관리 가이드: 소재가 있으면 이용 가능
+- 관리 캘린더: `GET /my-items/{myItemId}/care-calendar?month=YYYY-MM`
+- 구매일은 `GET /my-items/{myItemId}`의 `purchaseDate`로 달력에 함께 표시
+- `material` 또는 `purchaseDate`가 부족하면 캘린더가 `available=false`를 반환할 수 있음
+- 아이템별 알림 설정은 `GET/PUT /my-items/{myItemId}/care-reminder-setting`
+- 재활성화 시 과거 일정을 소급 생성하지 않고 `enabledAt` 이후 일정부터 생성
+- 서비스 알림 목록은 `GET /notifications?page=0&size=20&sort=createdAt,desc`
+- 현재 실제 알림 Type은 `CARE_REMINDER`이며 `PATCH /notifications/{notificationId}` Body는 `{ "read": true }`
+
 ## Optimistic Lock과 Partial Write
 
 - Preference 최초 저장 `version=0`, 수정은 최신 version 전달
 - MyItem·StylePlan PATCH는 최신 version 전달
 - `409 RESOURCE_VERSION_CONFLICT` 시 최신 데이터를 다시 조회
 - 이미지 업로드와 MyItem 생성은 별도 단계이므로 MyItem 성공 후 이미지 연결 실패를 별도 상태로 보존
-- AI Job 재시도는 같은 논리 요청에서 동일한 `Idempotency-Key`를 재사용하는 정책이 필요
+- AI Job 재시도는 같은 논리 요청에서 동일한 `Idempotency-Key`를 재사용
+- 같은 Key와 다른 Request는 `409 IDEMPOTENCY_KEY_CONFLICT`로 처리
+- 구매 활용성 진행 Job의 `jobId`와 Key는 productId별 sessionStorage에 보존하고 terminal 상태에서 제거
+- 늦게 도착한 목록 응답이 최신 필터 결과를 덮지 않도록 이전 요청을 취소하고 요청 sequence를 비교
+
+## 오류·Fallback
+
+| 상황 | 처리 |
+| --- | --- |
+| `400` Validation | `error.fields`를 입력 필드에 연결 |
+| `401` Access Token 만료 | Refresh 단일 실행 후 원 요청 1회 재시도 |
+| Refresh `401` | 세션 정리 후 로그인 이동 |
+| `409 RESOURCE_VERSION_CONFLICT` | 최신 리소스 재조회 후 사용자 재시도 |
+| `409 IDEMPOTENCY_KEY_CONFLICT` | 새 논리 요청인지 확인 후 새 Key 생성 |
+| `413`·`415` 이미지 오류 | 파일 크기·형식 안내 후 수동 등록 허용 |
+| `429` AI 요청 제한 | 자동 반복 요청을 중단하고 재시도 안내 |
+| `502`·`503`·`504` | Provider/Backend 장애로 분리해 재시도 안내 |
+| Job `FAILED` | HTTP 상태와 별개로 `data.status`와 `data.error.code` 확인 |
+| `INSUFFICIENT_DATA` | 오류 화면이 아니라 필요한 데이터 입력 안내 |
 
 ## 호출 금지
 

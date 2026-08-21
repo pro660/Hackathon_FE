@@ -2,7 +2,17 @@
 
 사용자 취향과 보유 아이템을 기반으로 MCM 제품, 구매 전 활용 가능성, 스마트 착용 플랜과 어울리는 장소를 제공하는 모바일 중심 서비스입니다.
 
-프론트 API 계약은 `입을래_API_명세서_v0.4_최종`과 Backend `main` 기준 커밋 `7bdd532`를 기준으로 합니다. 세부 호출 규칙은 [`API_CONVENTIONS.md`](./API_CONVENTIONS.md)를 따릅니다.
+프론트 API 계약은 `입을래_API_명세서_v0.4_최종`, 이후 FE 변경 명세와 현재 구현을 기준으로 합니다. 세부 요청·응답·인증·예외 처리 규칙은 [`API_CONVENTIONS.md`](./API_CONVENTIONS.md)를 따릅니다.
+
+## 핵심 기능
+
+- 취향 프로필 저장: 선호 색상·제품 카테고리·STYLE
+- MCM 제품 탐색·조건별 Rule-Based 추천·찜·구매 후보 보관
+- 보유 아이템 등록: 이미지 업로드, 선택적 AI 분석, 수동 수정
+- 구매 전 활용 가능성: Backend 점수 계산과 AI/Rule-Based 설명
+- 스마트 착용 추천: STYLE_PLAN 생성, 저장, 장소 추천 연결
+- 제품 패스포트·구매 정보·맞춤 관리 가이드·관리 캘린더
+- 저장한 장소·서비스 내부 관리 알림·마이페이지 계정 관리
 
 ## 기술 스택
 
@@ -13,9 +23,11 @@
 | React | 19 | 화면을 재사용 가능한 컴포넌트와 상태 단위로 구성합니다. |
 | TypeScript | strict | Endpoint별로 다른 ID 타입과 응답 구조를 컴파일 단계에서 검증합니다. |
 | Tailwind CSS | 4 | 모바일 화면의 간격과 상태별 스타일을 컴포넌트 가까이에서 관리합니다. |
-| Axios | 1 | Bearer Token, Refresh Cookie, 401 단일 재발급과 타임아웃 정책을 공통 적용합니다. |
+| Axios | 1 | Bearer Token, Refresh Cookie, 401 단일 재발급과 10초 타임아웃을 공통 적용합니다. |
 | Zustand | 5 | Access Token 메모리 상태와 화면별 비동기 상태를 관리합니다. |
 | MapLibre GL JS | 5 | OpenFreeMap 벡터 지도에 백엔드가 반환한 장소 좌표를 표시합니다. |
+| Motion | 13 | 화면 전환, 로딩, 점수와 게이지 애니메이션을 재사용합니다. |
+| React Icons | 5 | API 이미지가 없는 관리·알림·장소 상태를 일관된 아이콘으로 표현합니다. |
 
 ## 실행
 
@@ -144,7 +156,7 @@ GET /auth/oauth/{provider}
 | 장소 | `GET /places`, `GET /places/{placeId}`, StylePlan 장소 추천·저장 API |
 | 홈 | `GET /home` |
 
-STYLE_PLAN의 새 슬라이더 UI는 `casualFormalLevel`과 `neatGlamorousLevel`을 함께 1~10 정수로 보내며 `styleTags`는 빈 배열이 아니라 필드 자체를 생략합니다. AI Polling은 2초부터 시작해 최대 5초 간격으로 늘어나며, 프론트 안전 제한은 90초입니다.
+STYLE_PLAN의 슬라이더 UI는 `casualFormalLevel`과 `neatGlamorousLevel`을 함께 1~10 정수로 보내며 `styleTags`는 빈 배열이 아니라 필드 자체를 생략합니다. AI Job은 2초 간격으로 조회하고 30초에 자동 조회를 종료합니다.
 
 현재 호출하지 않는 경로:
 
@@ -206,9 +218,9 @@ Backend v0.4는 고정 Polling 시간을 API 계약으로 강제하지 않습니
 
 | 항목 | 값 |
 | --- | ---: |
-| 조회 간격 | 2초부터 시작해 최대 5초까지 점진적으로 증가 |
-| 최대 자동 조회 | 90초 |
-| 최대 시도 | 15회 |
+| 조회 간격 | 2초 |
+| 최대 자동 조회 | 30초 |
+| 최대 조회 횟수 | 약 15회 |
 
 - `SUCCEEDED`와 `FAILED`에서 즉시 종료합니다.
 - 화면을 벗어나면 `AbortController`로 취소합니다.
@@ -249,14 +261,18 @@ Backend Kakao Local 후보 조회
 | `/oauth/onboarding` | 신규 소셜 사용자 가입 완료 |
 | `/dashboard` | 홈 Read Model |
 | `/preferences` | 취향 저장 |
-| `/recommendations` | 추천 제품 |
+| `/recommendations`, `/recommendations/result` | 추천 조건·결과 |
 | `/recommendations/[productId]` | 제품 상세 |
 | `/recommendations/[productId]/value-check` | 구매 전 활용 가능성 |
-| `/items`, `/items/new`, `/items/analysis` | 마이 아이템 |
-| `/items/[itemId]/passport` | 실제 내 아이템 제품 패스포트 |
-| `/wishlist` | 찜한 제품 |
-| `/place` | 장소 추천·지도 |
-| `/care/guide`, `/care/calendar` | 관리 가이드·캘린더 |
+| `/products`, `/products/[productId]` | 전체 MCM 제품·공식 제품 상세 |
+| `/wishlist`, `/cart` | 찜한 제품·담은 제품 |
+| `/items`, `/items/new`, `/items/analysis` | 내 아이템 목록·등록·AI 분석 |
+| `/items/[itemId]`, `/items/[itemId]/edit` | 아이템 상세·수정 |
+| `/items/[itemId]/passport` | 제품 패스포트 |
+| `/smart-recommendations/*` | 스마트 착용 조건·생성·결과 |
+| `/place`, `/place/[placeId]`, `/place/saved` | 장소 추천·상세·저장 목록 |
+| `/care/guide`, `/care/storage`, `/care/calendar` | 관리 가이드·보관법·캘린더 |
+| `/notifications` | 서비스 내부 관리 알림 |
 | `/my` | 마이페이지·로그아웃 |
 | `/my/settings` | 계정 설정 |
 | `/my/settings/password` | 비밀번호 변경 |
@@ -293,6 +309,35 @@ API 모듈:
 | `intelligenceApi.ts` | AI Job·StylePlan·장소 |
 | `utilityApi.ts` | 구매 활용성 결과 조회 |
 | `notificationApi.ts` | 서비스 내부 알림 |
+
+## 설계 가정
+
+- 화면은 최대 폭 `390px`의 모바일 UI를 기준으로 하며 데스크톱에서는 휴대폰 프레임으로 표시합니다.
+- Backend가 인증, 추천 점수, Kakao 장소 후보 조회, 데이터 트랜잭션을 책임집니다.
+- Frontend는 Kakao SDK를 호출하지 않고 장소의 위도·경도만 받아 OpenFreeMap에 표시합니다.
+- Access Token은 인증 판단용 메모리 상태이고, localStorage의 사용자 정보는 화면 표시용 캐시입니다.
+- 구매 전 활용성 점수는 AI가 아닌 Backend Rule-Based 결과입니다. AI는 설명 생성에만 사용하며 실패 시 Rule-Based 설명을 허용합니다.
+- 서비스 내부 알림은 현재 `CARE_REMINDER`만 지원하며 Web Push·FCM 알림은 MVP 범위가 아닙니다.
+- `OTHER`·`UNKNOWN` 소재는 범용 관리 가이드를 표시할 수 있지만 정기 관리 일정은 없을 수 있습니다.
+
+## 예외·엣지 케이스 처리
+
+| 상황 | 프론트 처리 |
+| --- | --- |
+| 일반 API 지연 | Axios 요청을 10초에 종료하고 재시도 가능한 오류 상태를 표시합니다. |
+| AI Job 지연 | 2초 간격으로 최대 30초 조회하고, 화면 이탈 시 요청과 타이머를 취소합니다. |
+| Access Token 만료 | 동시 401 요청이 하나의 Refresh 요청을 공유하고 각 원 요청은 한 번만 재시도합니다. |
+| Refresh 실패 | 메모리 Token과 저장된 사용자 캐시를 정리하고 로그인 흐름으로 보냅니다. |
+| 외부 날씨·위치 API 실패 | 대시보드 전체를 막지 않고 위치 권한 또는 날씨 안내 문구로 대체합니다. |
+| 이미지 업로드·AI 분석 실패 | 이미지 없이 수동 입력으로 아이템 등록을 계속할 수 있습니다. |
+| 아이템 생성 후 이미지 연결 실패 | 생성된 아이템을 유지하고 `image-retry` 흐름에서 사진만 다시 연결합니다. |
+| 중복 AI 요청 | `Idempotency-Key`를 사용하고 진행 중 구매 활용성 Job은 sessionStorage에 보존합니다. |
+| 수정 경합 | `version`을 전송하고 `409 RESOURCE_VERSION_CONFLICT` 시 최신 데이터를 다시 받아야 합니다. |
+| AI Job `FAILED` | 조회 HTTP 200과 Job 실패 상태를 구분하고 `error.code`를 화면 오류로 변환합니다. |
+| 구매 활용 정보 부족 | `INSUFFICIENT_DATA`를 정상 결과로 처리하고 필요한 취향·아이템 정보 입력을 안내합니다. |
+| 관리 일정 없음 | 구매일·소재 입력 여부를 안내하고 월 이동·빈 일정 상태를 표시합니다. |
+
+Frontend는 DB 트랜잭션을 직접 제어하지 않습니다. Backend의 원자적 처리 결과와 `409`를 기준으로 경합을 복구하며, 이미지 업로드→아이템 생성→이미지 연결처럼 여러 API에 걸친 작업은 단계별 성공 상태를 보존합니다.
 
 ## 검증 명령어
 
