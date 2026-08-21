@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { getGuideEntries } from "@/components/care/carePresentation";
 import { ConfirmDialog } from "@/components/common/feedback/ConfirmDialog";
@@ -9,13 +10,26 @@ import { LuxuryReveal } from "@/components/common/motion/LuxuryReveal";
 import { BackButton } from "@/components/common/navigation/BackButton";
 import { BottomNavigation } from "@/components/common/navigation/BottomNavigation";
 import { backendApi } from "@/services/api";
-import type { CareCalendar, CareReminderSetting } from "@/types/api";
+import type { CareCalendar, CareReminderSetting, MyItemDetail } from "@/types/api";
 
 type CareScheduleScreenProps = { itemId?: string };
-type CalendarEvent = { date: string; title: string; description?: string };
+type CalendarEvent = {
+  date: string;
+  title: string;
+  kind: "purchase" | "care";
+  description?: string;
+};
 
 const dateKeys = ["date", "scheduledDate", "careDate", "dueDate"];
 const titleKeys = ["title", "name", "routineType", "type", "label"];
+
+function formatRoutineType(value: string) {
+  const labels: Record<string, string> = {
+    CLEANING: "클리닝",
+    CONDITIONING: "컨디셔닝",
+  };
+  return labels[value] ?? value;
+}
 
 function collectEvents(value: unknown, events: CalendarEvent[] = []): CalendarEvent[] {
   if (Array.isArray(value)) {
@@ -27,12 +41,15 @@ function collectEvents(value: unknown, events: CalendarEvent[] = []): CalendarEv
   const record = value as Record<string, unknown>;
   const date = dateKeys.map((key) => record[key]).find((entry): entry is string => typeof entry === "string" && /^\d{4}-\d{2}-\d{2}/.test(entry));
   if (date) {
-    const title = titleKeys.map((key) => record[key]).find((entry): entry is string => typeof entry === "string");
+    const directTitle = titleKeys.map((key) => record[key]).find((entry): entry is string => typeof entry === "string");
+    const routineTitle = Array.isArray(record.routineTypes)
+      ? record.routineTypes.filter((entry): entry is string => typeof entry === "string").map(formatRoutineType).join(" · ")
+      : null;
     const description = Object.entries(record)
       .filter(([key, entry]) => !dateKeys.includes(key) && !titleKeys.includes(key) && typeof entry === "string")
       .map(([, entry]) => entry as string)
       .join(" · ");
-    events.push({ date: date.slice(0, 10), title: title ?? "관리 예정", ...(description ? { description } : {}) });
+    events.push({ date: date.slice(0, 10), title: directTitle ?? (routineTitle ? `${routineTitle} 예정` : "관리 예정"), kind: "care", ...(description ? { description } : {}) });
   }
 
   Object.values(record).forEach((entry) => collectEvents(entry, events));
@@ -50,9 +67,14 @@ function createMonthCells(month: string) {
 }
 
 export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
-  const month = useMemo(() => new Date().toISOString().slice(0, 7), []);
+  const initialMonth = useMemo(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  }, []);
+  const [month, setMonth] = useState(initialMonth);
   const cells = useMemo(() => createMonthCells(month), [month]);
   const [calendar, setCalendar] = useState<CareCalendar | null>(null);
+  const [item, setItem] = useState<MyItemDetail | null>(null);
   const [reminder, setReminder] = useState<CareReminderSetting | null>(null);
   const [isUpdatingReminder, setIsUpdatingReminder] = useState(false);
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
@@ -70,22 +92,58 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
         if (!controller.signal.aborted) setError("관리 캘린더를 불러오지 못했습니다.");
       });
 
+    return () => controller.abort();
+  }, [itemId, month]);
+
+  useEffect(() => {
+    if (!itemId) return;
+    const controller = new AbortController();
+    void backendApi.closet
+      .getItem(itemId, controller.signal)
+      .then((response) => setItem(response.data.data))
+      .catch(() => undefined);
     void backendApi.closet
       .getCareReminderSetting(itemId, controller.signal)
       .then((reminderResponse) => setReminder(reminderResponse.data.data))
       .catch(() => undefined);
-
     return () => controller.abort();
-  }, [itemId, month]);
+  }, [itemId]);
 
   const events = calendar ? collectEvents(calendar) : [];
-  const eventDays = new Set(
-    events
-      .filter((event) => event.date.startsWith(month))
-      .map((event) => Number(event.date.slice(8, 10))),
+  const currentMonthEvents = events.filter((event) => event.date.startsWith(month));
+  const itemEvents: CalendarEvent[] = [];
+  if (item?.purchaseDate?.startsWith(month)) {
+    itemEvents.push({ date: item.purchaseDate.slice(0, 10), title: "구매일", kind: "purchase" });
+  }
+  if (
+    item?.nextCareDate?.startsWith(month) &&
+    !currentMonthEvents.some((event) => event.date === item.nextCareDate?.slice(0, 10))
+  ) {
+    itemEvents.push({ date: item.nextCareDate.slice(0, 10), title: "다음 권장 관리일", kind: "care" });
+  }
+  const displayedEvents = [...itemEvents, ...currentMonthEvents].sort((a, b) => a.date.localeCompare(b.date));
+  const purchaseDays = new Set(
+    displayedEvents.filter((event) => event.kind === "purchase").map((event) => Number(event.date.slice(8, 10))),
+  );
+  const careDays = new Set(
+    displayedEvents.filter((event) => event.kind === "care").map((event) => Number(event.date.slice(8, 10))),
   );
   const fallbackEntries = calendar && events.length === 0 ? getGuideEntries(calendar) : [];
+  const hasNoSchedule = Boolean(
+    calendar &&
+      calendar.available !== false &&
+      displayedEvents.length === 0 &&
+      fallbackEntries.length === 0,
+  );
   const monthTitle = new Date(`${month}-01T00:00:00`).toLocaleDateString("en-US", { month: "long", year: "numeric" }).toUpperCase();
+
+  const moveMonth = (offset: number) => {
+    const [year, monthNumber] = month.split("-").map(Number);
+    const next = new Date(year, monthNumber - 1 + offset, 1);
+    setCalendar(null);
+    setError(null);
+    setMonth(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`);
+  };
 
   const toggleReminder = async () => {
     if (!itemId || !reminder || isUpdatingReminder) return;
@@ -124,25 +182,53 @@ export function CareScheduleScreen({ itemId }: CareScheduleScreenProps) {
           <>
             <LuxuryReveal className="mt-8" delay={60}>
               <section className="rounded-[18px] border border-[#e4e4e8] bg-[#f7f7f8] px-4 pt-5 pb-6">
-                <h2 className="text-center text-[13px] font-bold text-[#2b2b31]">{monthTitle}</h2>
+                <div className="grid grid-cols-[36px_1fr_36px] items-center">
+                  <button type="button" aria-label="이전 달" onClick={() => moveMonth(-1)} className="flex size-9 items-center justify-center rounded-full text-[22px] text-[#686871] hover:bg-[#e9e9ec]">‹</button>
+                  <h2 className="text-center text-[13px] font-bold text-[#2b2b31]">{monthTitle}</h2>
+                  <button type="button" aria-label="다음 달" onClick={() => moveMonth(1)} className="flex size-9 items-center justify-center rounded-full text-[22px] text-[#686871] hover:bg-[#e9e9ec]">›</button>
+                </div>
                 <div className="mt-5 grid grid-cols-7 text-center text-[10px] font-medium text-[#8a8a93]">
                   {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}
                 </div>
                 <div className="mt-3 grid grid-cols-7 gap-y-3 text-center text-[10px] text-[#5d5d66]">
-                  {cells.map((day, index) => (
-                    <span key={index} className="flex h-8 items-center justify-center">
-                      {day ? <span className={`flex size-6 items-center justify-center rounded-full ${eventDays.has(day) ? "bg-[#17171c] font-bold text-white" : ""}`}>{day}</span> : null}
-                    </span>
-                  ))}
+                  {cells.map((day, index) => {
+                    const isPurchaseDay = Boolean(day && purchaseDays.has(day));
+                    const isCareDay = Boolean(day && careDays.has(day));
+                    const eventClassName = isPurchaseDay && isCareDay
+                      ? "bg-[linear-gradient(135deg,#aa8d62_50%,#17171c_50%)] font-bold text-white"
+                      : isPurchaseDay
+                        ? "bg-[#aa8d62] font-bold text-white"
+                        : isCareDay
+                          ? "bg-[#17171c] font-bold text-white"
+                          : "";
+                    return (
+                      <span key={index} className="flex h-8 items-center justify-center">
+                        {day ? <span className={`flex size-6 items-center justify-center rounded-full ${eventClassName}`}>{day}</span> : null}
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="mt-5 flex items-center justify-center gap-5 border-t border-[#e2e2e5] pt-4 text-[10px] text-[#686871]">
+                  <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#aa8d62]" />구매일</span>
+                  <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#17171c]" />관리 예정일</span>
                 </div>
               </section>
             </LuxuryReveal>
 
             <LuxuryReveal className="mt-7 space-y-4" delay={110}>
-              {calendar.available === false ? <StatusCard text="구매일 또는 소재 정보가 없어 관리 일정을 계산할 수 없습니다." /> : null}
-              {events.map((event, index) => (
+              {calendar.available === false && itemId ? (
+                <div className="rounded-[16px] border border-[#e4e4e8] bg-[#f8f8f9] px-5 py-6 text-center">
+                  <p className="text-[13px] leading-5 text-[#777780]">구매일 또는 소재 정보가 없어 관리 일정을 만들 수 없어요.</p>
+                  <Link href={`/items/${encodeURIComponent(itemId)}/edit`} className="mx-auto mt-5 flex h-11 max-w-[220px] items-center justify-center rounded-[13px] bg-[#17171c] text-[12px] font-bold text-white">제품 정보 확인하기</Link>
+                </div>
+              ) : null}
+              {hasNoSchedule ? <StatusCard text={`이 달에는 예정된 관리 일정이 없어요. 다른 달을 확인하거나 관리 알림을 ${reminder?.enabled ? "기다려 주세요" : "설정해 보세요"}.`} /> : null}
+              {displayedEvents.map((event, index) => (
                 <article key={`${event.date}-${event.title}-${index}`} className="rounded-[14px] border border-[#e4e4e8] bg-[#f7f7f8] px-4 py-4">
-                  <p className="text-[14px] font-bold">{event.date.slice(5).replace("-", "/")} {event.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`size-2 rounded-full ${event.kind === "purchase" ? "bg-[#aa8d62]" : "bg-[#17171c]"}`} />
+                    <p className="text-[14px] font-bold">{event.date.slice(5).replace("-", "/")} {event.title}</p>
+                  </div>
                   {event.description ? <p className="mt-2 text-[11px] leading-4 text-[#777780]">{event.description}</p> : null}
                 </article>
               ))}

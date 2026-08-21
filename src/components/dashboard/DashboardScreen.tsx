@@ -353,6 +353,12 @@ export function DashboardScreen() {
             >
               스마트 착용 추천&nbsp; ›
             </Link>
+            <Link
+              href="/dashborad"
+              className="mt-[14px] flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
+            >
+              내 제품 관리 알림&nbsp; ›
+            </Link>
           </article>
         </LuxuryReveal>
 

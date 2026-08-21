@@ -259,7 +259,10 @@ export function ItemEditScreen({ itemId }: ItemEditScreenProps) {
             ))}
           </div>
         ) : (
-          <LuxuryReveal className="mt-[68px]" delay={60}>
+          <LuxuryReveal
+            className={`relative mt-[68px] ${openFilter ? "z-[9999]" : "z-0"}`}
+            delay={60}
+          >
             <div className="space-y-3">
               <label className={fieldShellClassName}>
                 <span className="mr-1 shrink-0">제품명 ·</span>
