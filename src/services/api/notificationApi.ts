@@ -7,10 +7,10 @@ import type {
 } from "@/types/api";
 
 export const notificationApi = {
-  getNotifications: (params: PageQuery = {}) =>
+  getNotifications: (params: PageQuery = {}, signal?: AbortSignal) =>
     api.get<ApiSuccessResponse<ApiPage<ServiceNotification>>>(
       "/notifications",
-      { params },
+      { params, signal },
     ),
 
   setNotificationRead: (notificationId: string, read: boolean) =>

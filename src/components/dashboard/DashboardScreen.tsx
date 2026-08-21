@@ -8,7 +8,6 @@ import { BottomNavigation } from "@/components/common/navigation/BottomNavigatio
 import { useAuthStore } from "@/store/useAuthStore";
 import { useHomeStore } from "@/store/useHomeStore";
 import { useMenuDataStore } from "@/store/useMenuDataStore";
-import { useProductRecommendationStore } from "@/store/useProductRecommendationStore";
 
 type WeatherSummary = {
   locationLabel: string;
@@ -211,17 +210,11 @@ export function DashboardScreen() {
   const profile = useMenuDataStore((state) => state.profile);
   const loadProfile = useMenuDataStore((state) => state.loadProfile);
   const homeData = useHomeStore((state) => state.data);
+  const homeIsLoading = useHomeStore((state) => state.isLoading);
+  const homeError = useHomeStore((state) => state.error);
   const loadHome = useHomeStore((state) => state.loadHome);
-  const products = useProductRecommendationStore((state) => state.products);
-  const productStatus = useProductRecommendationStore((state) => state.status);
-  const loadProducts = useProductRecommendationStore(
-    (state) => state.loadProducts,
-  );
   const [weather, setWeather] = useState<WeatherSummary | null>(null);
   const [weatherError, setWeatherError] = useState<string | null>(null);
-  const purchaseUtilityHref = products[0]
-    ? `/recommendations/${products[0].id}/value-check`
-    : "/recommendations/value-check";
 
   useEffect(() => {
     if (hasHydrated && !profile) {
@@ -231,11 +224,6 @@ export function DashboardScreen() {
       void loadHome();
     }
   }, [hasHydrated, homeData, loadHome, loadProfile, profile]);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-    return loadProducts("ALL");
-  }, [hasHydrated, loadProducts]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -339,7 +327,7 @@ export function DashboardScreen() {
         </LuxuryReveal>
 
         <LuxuryReveal className="mt-5" delay={80}>
-          <article className="h-[165px] overflow-hidden rounded-[18px] bg-[#0e0e12] px-5 pt-5">
+          <article className="h-[207px] overflow-hidden rounded-[18px] bg-[#0e0e12] px-5 pt-5">
             <p className="text-[12px] leading-[17px] font-bold text-[#b89666]">
               오늘의 스타일 플랜
             </p>
@@ -347,72 +335,56 @@ export function DashboardScreen() {
               {homeData?.latestStylePlan?.title ??
                 "아직 저장한 스타일 플랜이 없어요"}
             </h2>
-            <Link
-              href="/smart-recommendations"
-              className="mt-[14px] flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
-            >
-              스마트 착용 추천&nbsp; ›
-            </Link>
-            <Link
-              href="/dashborad"
-              className="mt-[14px] flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
-            >
-              내 제품 관리 알림&nbsp; ›
-            </Link>
+            <div className="mt-[14px] space-y-2">
+              <Link
+                href="/smart-recommendations"
+                className="flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
+              >
+                스마트 착용 추천&nbsp; ›
+              </Link>
+              <Link
+                href="/notifications"
+                className="flex h-[30px] w-[168px] items-center justify-center rounded-[15px] bg-[#b99666] text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#c5a778]"
+              >
+                내 제품 관리 알림&nbsp; ›
+              </Link>
+            </div>
           </article>
         </LuxuryReveal>
 
-        <LuxuryReveal className="mt-4 grid grid-cols-2 gap-4" delay={160}>
-          <Link
-            href="/care/calendar"
-            className="flex h-[54px] items-center justify-center rounded-[14px] border border-[#dbdee3] bg-[#f7f7f8] px-3 text-center text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#f1f1f3]"
-          >
-            내 제품 관리 알림
-          </Link>
-          <Link
-            href={purchaseUtilityHref}
-            className="flex h-[54px] items-center justify-center rounded-[14px] border border-[#dbdee3] bg-[#f7f7f8] px-3 text-center text-[11px] font-bold text-[#0e0e12] transition-colors hover:bg-[#f1f1f3]"
-          >
-            구매 전 활용 체크
-          </Link>
-        </LuxuryReveal>
-
-        <LuxuryReveal className="mt-5" delay={300}>
-          <div className="mb-4 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-[16px] leading-5 font-bold text-[#0e0e12]">
-                MCM 제품
-              </h2>
-              <p className="mt-1.5 text-[12px] leading-4 text-[#6e707a]">
-                취향과 잘 맞는 제품을 더 둘러보세요
-              </p>
-            </div>
-            <Link
-              href="/products"
-              className="shrink-0 pb-0.5 text-[11px] font-bold text-[#6e707a] transition-colors hover:text-[#0e0e12]"
-            >
-              더보기&nbsp; ›
-            </Link>
+        <LuxuryReveal className="mt-12" delay={160}>
+          <div className="mb-4">
+            <h2 className="text-[16px] leading-5 font-bold text-[#0e0e12]">
+              MCM 제품
+            </h2>
+            <p className="mt-1.5 text-[12px] leading-4 text-[#6e707a]">
+              취향과 잘 맞는 제품을 더 둘러보세요
+            </p>
           </div>
           <ul className="space-y-2">
-            {products.slice(0, 3).map((product) => (
-              <li key={product.id}>
+            {homeData?.recommendedProducts.slice(0, 3).map((product) => (
+              <li key={product.productId}>
                 <ProductRowCard
-                  href={`/products/${product.id}`}
-                  title={product.displayName}
-                  imageUrl={product.imageUrl}
+                  href={`/products/${product.productId}`}
+                  title={product.name}
+                  imageUrl={product.primaryImageUrl ?? undefined}
                 />
               </li>
             ))}
           </ul>
-          {productStatus === "loading" && products.length === 0 ? (
+          {homeIsLoading && !homeData ? (
             <p className="py-6 text-center text-[12px] text-[#777780]">
               제품을 불러오는 중입니다.
             </p>
           ) : null}
-          {productStatus === "error" ? (
+          {homeError ? (
             <p className="py-6 text-center text-[12px] text-[#9a4545]">
               제품 목록을 불러오지 못했습니다.
+            </p>
+          ) : null}
+          {!homeIsLoading && !homeError && homeData?.recommendedProducts.length === 0 ? (
+            <p className="py-6 text-center text-[12px] text-[#777780]">
+              아직 추천 제품이 없습니다.
             </p>
           ) : null}
         </LuxuryReveal>
